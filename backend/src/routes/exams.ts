@@ -78,7 +78,11 @@ router.post('/:examId/questions', authenticateJWT, authorizeRoles('tpo'), async 
 // Submit exam attempt (Student only)
 router.post('/:examId/attempt', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
     const { examId } = req.params;
-    const { answers } = req.body; // Map of { questionId: answer }
+    const { answers, attempt_id } = req.body; // Map of { questionId: answer }
+
+    if (!attempt_id) {
+        return res.status(400).json({ error: 'attempt_id required' });
+    }
 
     try {
         // Fetch correct answers
@@ -90,14 +94,44 @@ router.post('/:examId/attempt', authenticateJWT, authorizeRoles('student'), asyn
             }
         });
 
+        // Update existing attempt
         const attempt = await query(
-            'INSERT INTO attempts (exam_id, student_id, score) VALUES ($1, $2, $3) RETURNING *',
-            [examId, req.user?.id, score]
+            'UPDATE attempts SET score = $1, submitted_at = NOW() WHERE id = $2 AND student_id = $3 RETURNING *',
+            [score, attempt_id, req.user?.id]
         );
 
-        res.status(201).json(attempt.rows[0]);
+        if (attempt.rows.length === 0) {
+            return res.status(404).json({ error: 'Attempt not found' });
+        }
+
+        res.status(200).json(attempt.rows[0]);
     } catch (err) {
         res.status(500).json({ error: 'Failed to submit attempt' });
+    }
+});
+
+// Get Exam Integrity Logs (TPO/Admin)
+router.get('/:examId/integrity', authenticateJWT, authorizeRoles('tpo', 'admin'), async (req: AuthRequest, res: any) => {
+    const { examId } = req.params;
+    try {
+        // Verify exam belongs to college
+        if (req.user?.role !== 'admin') {
+             const check = await query('SELECT id FROM exams WHERE id = $1 AND college_id = $2', [examId, req.user?.college_id]);
+             if (check.rows.length === 0) return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        const logs = await query(
+            `SELECT il.*, a.student_id, u.name as student_name, u.email as student_email 
+             FROM integrity_logs il
+             JOIN attempts a ON il.attempt_id = a.id
+             JOIN users u ON a.student_id = u.id
+             WHERE a.exam_id = $1
+             ORDER BY il.timestamp DESC`,
+            [examId]
+        );
+        res.json(logs.rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch integrity logs' });
     }
 });
 
