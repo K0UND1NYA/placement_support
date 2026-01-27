@@ -7,10 +7,16 @@ import { apiFetch } from '@/lib/api';
 export default function TPOLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  // OTP State
+  const [otp, setOtp] = useState('');
+  const [otpId, setOtpId] = useState(null);
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // STEP 1: Verify Credentials
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -22,6 +28,31 @@ export default function TPOLoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      if (data.status === 'OTP_REQUIRED') {
+        setOtpId(data.otpId);
+      } else {
+        // Fallback if backend implementation changes
+        throw new Error('Unexpected login response');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // STEP 2: Verify OTP
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const data = await apiFetch('/auth/verify-otp', {
+        method: 'POST',
+        body: JSON.stringify({ otpId, otp }),
+      });
+
       if (data.user.role !== 'tpo') {
         throw new Error('Access denied: You are not a TPO');
       }
@@ -31,7 +62,7 @@ export default function TPOLoginPage() {
       document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
       router.push('/dashboard');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'OTP Verification failed');
     } finally {
       setLoading(false);
     }
@@ -48,45 +79,76 @@ export default function TPOLoginPage() {
             College Placement Authority Control
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          {error && (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600 font-bold text-center italic">
-              ALERT: {error}
-            </div>
-          )}
-          <div className="space-y-4">
-            <div className="group">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Credentials | Email</label>
-              <input
-                type="email"
-                required
-                className="block w-full rounded-xl border-2 border-slate-100 py-3 px-4 text-slate-900 focus:border-blue-600 transition-all outline-none bg-slate-50 font-medium"
-                placeholder="authority@college.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="group">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Security | Password</label>
-              <input
-                type="password"
-                required
-                className="block w-full rounded-xl border-2 border-slate-100 py-3 px-4 text-slate-900 focus:border-blue-600 transition-all outline-none bg-slate-50 font-medium"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+        
+        {error && (
+          <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600 font-bold text-center italic">
+            ALERT: {error}
           </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-xl text-lg font-black text-white bg-blue-700 hover:bg-blue-800 disabled:opacity-50 transition-all transform hover:-translate-y-1 active:translate-y-0 uppercase tracking-widest italic"
-          >
-            {loading ? 'Verifying Identity...' : 'Authorize Login'}
-          </button>
-        </form>
+        {!otpId ? (
+          // STEP 1 FORM
+          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            <div className="space-y-4">
+              <div className="group">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Credentials | Email</label>
+                <input
+                  type="email"
+                  required
+                  className="block w-full rounded-xl border-2 border-slate-100 py-3 px-4 text-slate-900 focus:border-blue-600 transition-all outline-none bg-slate-50 font-medium"
+                  placeholder="authority@college.edu"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="group">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Security | Password</label>
+                <input
+                  type="password"
+                  required
+                  className="block w-full rounded-xl border-2 border-slate-100 py-3 px-4 text-slate-900 focus:border-blue-600 transition-all outline-none bg-slate-50 font-medium"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-xl text-lg font-black text-white bg-blue-700 hover:bg-blue-800 disabled:opacity-50 transition-all transform hover:-translate-y-1 active:translate-y-0 uppercase tracking-widest italic"
+            >
+              {loading ? 'Verifying Identity...' : 'Authorize Login'}
+            </button>
+          </form>
+        ) : (
+          // STEP 2 FORM
+          <form className="mt-8 space-y-6" onSubmit={handleVerifyOtp}>
+            <div className="space-y-4">
+              <div className="group">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">2FA | OTP Code</label>
+                <input
+                  type="text"
+                  required
+                  className="block w-full rounded-xl border-2 border-slate-100 py-3 px-4 text-slate-900 focus:border-blue-600 transition-all outline-none bg-slate-50 font-medium text-center tracking-[1em] font-mono text-lg"
+                  placeholder="XXXXXX"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-xl text-lg font-black text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 transition-all transform hover:-translate-y-1 active:translate-y-0 uppercase tracking-widest italic"
+            >
+              {loading ? 'Validating Token...' : 'Complete Access'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

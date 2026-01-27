@@ -47,7 +47,8 @@ export default function ExamsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{exam.duration} mins</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{new Date(exam.created_at).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link href={`/dashboard/exams/${exam.id}/results`} className="text-blue-600 hover:text-blue-800 font-bold mr-4">View Results</Link>
+                    <Link href={`/dashboard/exams/${exam.id}/results`} className="text-blue-600 hover:text-blue-800 font-bold mr-4">Results</Link>
+                    <Link href={`/dashboard/exams/${exam.id}/integrity`} className="text-amber-600 hover:text-amber-800 font-bold mr-4">Integrity Report</Link>
                     <button className="text-red-500 hover:text-red-700 font-bold">Delete</button>
                   </td>
                 </tr>
