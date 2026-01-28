@@ -168,6 +168,12 @@ router.post('/verify-otp', async (req: any, res: any) => {
 
     const user = userResult.rows[0];
 
+    // Update last_login_at timestamp
+    await query(
+      'UPDATE users SET last_login_at = NOW() WHERE id = $1',
+      [user.id]
+    );
+
     console.log('Signing JWT...');
     const token = jwt.sign(
       { id: user.id, role: user.role, college_id: user.college_id },
@@ -215,7 +221,7 @@ router.post('/request-password-reset', async (req: any, res: any) => {
   email = email?.trim().toLowerCase();
 
   try {
-    const userResult = await query('SELECT id, email FROM users WHERE email = $1', [email]);
+    const userResult = await query('SELECT id, email, otp_request_attempts, otp_blocked_until FROM users WHERE email = $1', [email]);
     
     if (userResult.rows.length === 0) {
       // Return success even if user not found to prevent enumeration
@@ -223,6 +229,38 @@ router.post('/request-password-reset', async (req: any, res: any) => {
     }
 
     const user = userResult.rows[0];
+
+    // Check if user is currently blocked
+    if (user.otp_blocked_until && new Date(user.otp_blocked_until) > new Date()) {
+      const remainingMs = new Date(user.otp_blocked_until).getTime() - new Date().getTime();
+      const remainingMinutes = Math.ceil(remainingMs / 60000);
+      return res.status(429).json({ 
+        error: `Too many OTP requests. Please try again after ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.` 
+      });
+    }
+
+    // Check if user has reached the attempt limit
+    const currentAttempts = user.otp_request_attempts || 0;
+    
+    if (currentAttempts >= 2) {
+      // This will be the 3rd attempt, so block the user
+      const blockedUntil = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+      
+      await query(
+        'UPDATE users SET otp_request_attempts = $1, otp_blocked_until = $2 WHERE id = $3',
+        [currentAttempts + 1, blockedUntil, user.id]
+      );
+      
+      return res.status(429).json({ 
+        error: 'Too many OTP requests. Please try again after 10 minutes.' 
+      });
+    }
+
+    // Increment attempt counter
+    await query(
+      'UPDATE users SET otp_request_attempts = otp_request_attempts + 1 WHERE id = $1',
+      [user.id]
+    );
 
     // Create OTP
     const otp = generateOTP();
@@ -268,6 +306,12 @@ router.post('/verify-reset-otp', async (req: any, res: any) => {
 
     // Mark used
     await query('UPDATE login_otps SET used = true WHERE id = $1', [otpId]);
+
+    // Reset rate limiting after successful verification
+    await query(
+      'UPDATE users SET otp_request_attempts = 0, otp_blocked_until = NULL WHERE id = $1',
+      [record.user_id]
+    );
 
     // Issue short-lived reset token
     // We reuse the JWT mechanism but maybe add a special scope/role claim? 

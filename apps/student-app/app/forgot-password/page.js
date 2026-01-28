@@ -27,6 +27,9 @@ export default function ForgotPasswordPage() {
   // STEP 1: Request OTP
   const handleRequestOtp = async (e) => {
     e.preventDefault();
+    
+    // Set loading immediately to prevent double-clicks
+    if (loading) return; // Prevent multiple submissions
     setLoading(true);
     setError('');
     setMessage('');
