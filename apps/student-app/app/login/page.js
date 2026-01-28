@@ -8,7 +8,6 @@ import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Loader2, RefreshCw } 
 
 export default function StudentLoginPage() {
   const router = useRouter();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,13 +20,11 @@ export default function StudentLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const res = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email: email.trim(), password: password.trim() }),
       });
-
       if (res.status === 'OTP_REQUIRED') {
         setOtpId(res.otpId);
       } else {
@@ -44,19 +41,15 @@ export default function StudentLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const res = await apiFetch('/auth/verify-otp', {
         method: 'POST',
         body: JSON.stringify({ otpId, otp }),
       });
-
       if (res.user.role !== 'student') throw new Error('Access denied');
-
       localStorage.setItem('token', res.token);
       localStorage.setItem('user', JSON.stringify(res.user));
       document.cookie = `token=${res.token}; path=/; max-age=86400; SameSite=Lax`;
-
       router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'Verification failed');
@@ -66,139 +59,143 @@ export default function StudentLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* --- LEFT SIDE: CENTRALIZED ILLUSTRATION --- */}
-      <div className="hidden lg:flex lg:w-1/2 bg-blue-50 items-center justify-center p-12 relative overflow-hidden">
-        {/* Decorative elements to reduce "empty" space */}
+    /* The key fix: 'h-screen' and 'overflow-hidden' on the main div 
+      locks the viewport so scrolling is physically impossible.
+    */
+    <div className="flex w-screen h-screen bg-white overflow-hidden fixed inset-0">
+      
+      {/* LEFT SIDE: Fixed and Centered */}
+      <div className="hidden lg:flex lg:w-1/2 bg-blue-50 items-center justify-center p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-100 rounded-full opacity-50 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-blue-100 rounded-full opacity-50 blur-3xl"></div>
 
         <div className="relative z-10 flex flex-col items-center">
+            {/* max-h-[45vh] ensures the image shrinks if the screen height is low */}
             <img 
               src="https://takafulcc.synergix.co.id/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogin.8b7a872f.jpg&w=640&q=75" 
               alt="Login Illustration" 
-              className="max-w-md w-full drop-shadow-2xl rounded-3xl animate-in fade-in zoom-in duration-700"
+              className="max-w-md w-full max-h-[65vh] object-contain drop-shadow-2xl rounded-3xl"
             />
-            <div className="mt-12 text-center max-w-sm">
-              <h1 className="text-3xl font-black text-blue-900 leading-tight">
+            <div className="mt-8 text-center max-w-sm">
+              <h1 className="text-2xl xl:text-3xl font-black text-blue-900 leading-tight">
                 Placement Guidance Platform
               </h1>
-              <p className="mt-4 text-blue-600 font-medium leading-relaxed">
+              <p className="mt-2 text-blue-600 font-medium text-sm xl:text-base">
                 Empowering students to reach their career goals with ease.
               </p>
             </div>
         </div>
       </div>
 
-      {/* --- RIGHT SIDE: FORM AREA --- */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 bg-slate-50 lg:bg-white">
-        <div className="w-full max-w-md">
+      {/* RIGHT SIDE: Vertical Centering without overflow */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 bg-white overflow-hidden">
+        <div className="w-full max-w-md flex flex-col">
           
-          <div className="mb-10 text-center lg:text-left">
-            <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Student Login</h2>
-            <p className="mt-3 text-gray-500 font-medium">Access your dashboard and placement resources.</p>
+          <div className="mb-6 text-center lg:text-left shrink-0">
+            <h2 className="text-3xl xl:text-4xl font-extrabold text-gray-900 tracking-tight">Student Login</h2>
+            <p className="mt-2 text-gray-500 font-medium text-sm">Access your dashboard and placement resources.</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600 flex items-center gap-3 animate-in slide-in-from-top-2">
-              <div className="h-2 w-2 rounded-full bg-red-600 shrink-0 animate-pulse"></div>
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-xs text-red-600 flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-red-600 shrink-0"></div>
               {error}
             </div>
           )}
 
-          {!otpId ? (
-            /* PHASE 1: EMAIL & PASSWORD */
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-1">Email Address</label>
-                <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm outline-none transition-all shadow-sm text-gray-700"
-                    placeholder="student@kit.edu"
-                  />
+          <div className="flex-1">
+            {!otpId ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 ml-1">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-base text-gray-900 font-bold outline-none transition-all shadow-sm placeholder:text-gray-400"
+                      placeholder="student@kit.edu"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-1">Password</label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm outline-none transition-all shadow-sm text-gray-700"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 ml-1">Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-base text-gray-900 font-bold outline-none transition-all shadow-sm placeholder:text-gray-400"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center gap-3 py-4 border border-transparent text-base font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-100 active:scale-[0.98] transition-all duration-300"
-              >
-                {loading ? <Loader2 className="animate-spin h-6 w-6" /> : (
-                  <>Sign In <ArrowRight size={20} /></>
-                )}
-              </button>
-            </form>
-          ) : (
-            /* PHASE 2: OTP VERIFICATION */
-            <form onSubmit={handleVerifyOtp} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-blue-50 rounded-3xl p-6 text-center border border-blue-100">
-                <ShieldCheck className="h-12 w-12 text-blue-600 mx-auto mb-3" />
-                <h3 className="text-xl font-bold text-blue-900">Check your email</h3>
-                <p className="text-sm text-blue-700 mt-2 font-medium italic">Sent to {email}</p>
-              </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center gap-3 py-3.5 border border-transparent text-sm font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 shadow-lg active:scale-[0.98] transition-all"
+                >
+                  {loading ? <Loader2 className="animate-spin h-5 w-5" /> : <>Sign In <ArrowRight size={18} /></>}
+                </button>
+              </form>
+            ) : (
+              /* OTP FORM - Fits perfectly in the box */
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <div className="bg-blue-50 rounded-2xl p-4 text-center border border-blue-100 shrink-0">
+                  <ShieldCheck className="h-10 w-10 text-blue-600 mx-auto mb-2" />
+                  <h3 className="text-lg font-bold text-blue-900">Check your email</h3>
+                  <p className="text-xs text-blue-700 mt-1">Sent to {email}</p>
+                </div>
 
-              <input
-                type="text"
-                required
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="block w-full text-center text-4xl tracking-[0.4em] font-mono py-6 border-2 border-gray-100 rounded-3xl focus:ring-8 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all bg-white shadow-inner text-gray-700"
-                placeholder="000000"
-              />
-              <button
-                type="submit"
-                className="w-full py-4 text-base font-black rounded-2xl text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all active:scale-[0.98] text-gray-700"
-              >
-                Confirm Code
-              </button>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="block w-full text-center text-4xl tracking-[0.5em] font-mono font-black py-6 border-2 border-gray-100 rounded-3xl focus:border-blue-500 outline-none bg-white text-gray-900 shadow-inner"
+                  placeholder="000000"
+                />
+                
+                <button
+                  type="submit"
+                  className="w-full py-3.5 text-sm font-black rounded-2xl text-white bg-blue-600 hover:bg-blue-700 shadow-lg active:scale-[0.98] transition-all"
+                >
+                  Confirm Code
+                </button>
 
-              <button 
-                type="button" 
-                onClick={() => setOtpId(null)} 
-                className="w-full text-xs font-bold text-gray-400 hover:text-blue-600 flex items-center justify-center gap-2 uppercase tracking-widest transition-colors"
-              >
-                <RefreshCw size={14} /> Back to Sign In
-              </button>
-            </form>
-          )}
+                <button 
+                  type="button" 
+                  onClick={() => setOtpId(null)} 
+                  className="w-full text-[10px] font-bold text-gray-400 flex items-center justify-center gap-2 uppercase tracking-widest"
+                >
+                  <RefreshCw size={12} /> Back to Sign In
+                </button>
+              </form>
+            )}
+          </div>
 
-          <div className="mt-12 flex flex-col items-center gap-4 border-t border-gray-100 pt-8">
-            <Link href="/signup" className="text-sm font-bold text-blue-600 hover:underline underline-offset-4 decoration-2">
+          {/* Footer links with smaller margins to ensure they stay on screen */}
+          <div className="mt-6 flex flex-col items-center gap-2 border-t border-gray-100 pt-4 shrink-0">
+            <Link href="/signup" className="text-xs font-bold text-blue-600 hover:underline">
               New student? Register account
             </Link>
-            <Link href="/forgot-password" className="text-sm font-bold text-blue-600 hover:underline underline-offset-4 decoration-2">
-                Forgot password?
+            <Link href="/forgot-password" className="text-xs font-bold text-blue-600 hover:underline">
+              Forgot password?
             </Link>
-
           </div>
           
         </div>
