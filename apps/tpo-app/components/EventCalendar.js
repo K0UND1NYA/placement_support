@@ -328,27 +328,33 @@ export default function EventCalendar() {
                             <input
                                 type="text"
                                 placeholder="Event Title..."
-                                className="w-full p-3 bg-slate-50 border-none rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                 value={newEventTitle}
                                 onChange={(e) => setNewEventTitle(e.target.value)}
                                 autoFocus
                             />
                             <div className="flex gap-2">
-                                <input
-                                    type="time"
-                                    className="w-1/3 p-3 bg-slate-50 border-none rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={newEventTime}
-                                    onChange={(e) => setNewEventTime(e.target.value)}
-                                />
-                                <select
-                                    className="flex-1 p-3 bg-slate-50 border-none rounded-xl text-sm font-semibold text-slate-600 outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={newEventType}
-                                    onChange={(e) => setNewEventType(e.target.value)}
-                                >
-                                    <option value="exam">Exam</option>
-                                    <option value="interview">Interview</option>
-                                    <option value="other">Other</option>
-                                </select>
+                                <div className="w-1/3 space-y-1">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Time</label>
+                                    <input
+                                        type="time"
+                                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                        value={newEventTime}
+                                        onChange={(e) => setNewEventTime(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex-1 space-y-1">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type</label>
+                                    <select
+                                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                                        value={newEventType}
+                                        onChange={(e) => setNewEventType(e.target.value)}
+                                    >
+                                        <option value="exam">Exam</option>
+                                        <option value="interview">Interview</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
                             </div>
                             <button
                                 type="submit"
