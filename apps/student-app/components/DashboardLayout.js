@@ -11,7 +11,10 @@ import {
   LogOut,
   Bell,
   Map,
+  X,
+  Megaphone,
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import TextType from "@/components/TextType";
 
 export function SidebarItem({ icon, label, active, onClick }) {
@@ -32,6 +35,8 @@ export function DashboardLayout({ children }) {
   const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [circulars, setCirculars] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -43,6 +48,17 @@ export function DashboardLayout({ children }) {
     }
     
     setUser(JSON.parse(userData));
+
+    // Fetch circulars for notification bell
+    const fetchCircularsData = async () => {
+      try {
+        const data = await apiFetch("/circulars");
+        setCirculars(data || []);
+      } catch (err) {
+        console.error("Failed to fetch circulars for notifications:", err);
+      }
+    };
+    fetchCircularsData();
   }, [router]);
 
   const handleLogout = () => {
@@ -59,6 +75,48 @@ export function DashboardLayout({ children }) {
     { href: "/dashboard/progress", label: "Progress", icon: <TrendingUp size={18} /> },
     { href: "/dashboard/career-mapping", label: "Career Mapping", icon: <Map size={18} /> },
   ];
+
+  const NotificationsPanel = () => (
+    <div className="absolute top-full right-0 mt-3 w-80 bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-6 z-[100] animate-in slide-in-from-top-2 fade-in duration-200">
+        <div className="flex justify-between items-center mb-6">
+            <h3 className="font-black text-slate-800 tracking-tight">Recent Circulars</h3>
+            <button onClick={() => setShowNotifications(false)}>
+                <X size={16} className="text-slate-400 hover:text-slate-600" />
+            </button>
+        </div>
+        <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+            {circulars.length === 0 ? (
+                <div className="py-8 text-center">
+                    <Megaphone size={24} className="mx-auto text-slate-200 mb-2" />
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No new circulars</p>
+                </div>
+            ) : (
+                circulars.map((n) => (
+                    <div key={n.id} className="p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 transition cursor-pointer flex gap-3 items-start group">
+                        <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <Megaphone size={14} className="text-blue-600 group-hover:text-white" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-slate-800 leading-tight mb-1 line-clamp-2">{n.title}</p>
+                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                                {new Date(n.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                            </p>
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+        <div className="mt-6 pt-4 text-center border-t border-slate-50">
+            <Link 
+                href="/dashboard" 
+                onClick={() => setShowNotifications(false)}
+                className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors"
+            >
+                View all on dashboard
+            </Link>
+        </div>
+    </div>
+  );
 
   return (
     <div className="h-screen bg-[#e8edff] flex overflow-hidden font-sans">
@@ -110,10 +168,17 @@ export function DashboardLayout({ children }) {
           />
         </span>
 
-        <div className="flex items-center gap-3">
-          <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+        <div className="flex items-center gap-3 relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative p-2 text-slate-400 hover:text-blue-600 transition-colors"
+          >
             <Bell size={18} />
+            {circulars.length > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            )}
           </button>
+          {showNotifications && <NotificationsPanel />}
           <div className="w-9 h-9 bg-blue-600 rounded-2xl flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-blue-200">
             {user?.name?.charAt(0) || "U"}
           </div>
@@ -183,11 +248,19 @@ export function DashboardLayout({ children }) {
             />
           </h1>
 
-          <div className="flex items-center gap-6">
-            <button className="relative p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all">
-              <Bell size={20} />
-              <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+          <div className="flex items-center gap-6 relative">
+            <div className="relative">
+                <button 
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all"
+                >
+                    <Bell size={20} />
+                    {circulars.length > 0 && (
+                        <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    )}
+                </button>
+                {showNotifications && <NotificationsPanel />}
+            </div>
 
             <Link
               href="/dashboard/profile"

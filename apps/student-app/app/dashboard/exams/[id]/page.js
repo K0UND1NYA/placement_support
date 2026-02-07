@@ -21,6 +21,7 @@ export default function ExamAttemptPage() {
   
   const mainContentRef = useRef(null);
   const qCardRef = useRef(null);
+  const questionStartTime = useRef(Date.now());
 
   // Logging utility
   const logEvent = useCallback((type, metadata = {}) => {
@@ -90,6 +91,8 @@ export default function ExamAttemptPage() {
         { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }
       );
     }
+    // Update timing ref when question changes
+    questionStartTime.current = Date.now();
   }, [activeQuestion]);
 
   // Timer logic
@@ -155,13 +158,35 @@ export default function ExamAttemptPage() {
 
   const handleAnswer = (questionId, option) => {
     const now = Date.now();
+    const timeSpentOnQuestion = (now - questionStartTime.current) / 1000; // in seconds
+    
     setAnswers(prev => ({ ...prev, [questionId]: option }));
+
+    // Integrity Check: Answering Speed Monitoring
+    // Context-aware logic: distinguish between suspicious speed and last-minute panic
+    if (timeSpentOnQuestion < 3 && timeLeft !== null) {
+        if (timeLeft > 120) {
+            // Main phase: Suspiciously fast (possibly copying or external aid)
+            logEvent('suspicious_answering_speed', { 
+                question_id: questionId, 
+                duration_seconds: timeSpentOnQuestion.toFixed(2),
+                phase: 'main_phase'
+            });
+        } else if (timeLeft <= 120 && timeLeft > 0) {
+            // Panic phase: Legitimate rush to finish the exam
+            logEvent('exam_panic_rush', { 
+                question_id: questionId, 
+                duration_seconds: timeSpentOnQuestion.toFixed(2),
+                phase: 'last_minutes_rush'
+            });
+        }
+    }
 
     setAnswerTimestamps(prev => {
         const newTimestamps = [...prev, { time: now }];
         const recent = newTimestamps.filter(t => now - t.time < 5000);
         if (recent.length >= 4) {
-            logEvent('rapid_answering', { count: recent.length, timestamp: new Date().toISOString() });
+            logEvent('rapid_answering_streak', { count: recent.length, timestamp: new Date().toISOString() });
             return [];
         }
         return recent;
