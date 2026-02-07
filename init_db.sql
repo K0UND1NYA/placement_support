@@ -251,5 +251,36 @@ CREATE POLICY "TPOs can manage college events"
 CREATE INDEX IF NOT EXISTS idx_events_college_id ON public.events (college_id);
 CREATE INDEX IF NOT EXISTS idx_events_created_by ON public.events (created_by);
 
+-- 13. notofications schema
+CREATE TABLE public.circulars (
+  id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+  college_id uuid REFERENCES public.colleges(id),
+  title text NOT NULL,
+  content text NOT NULL,
+  created_by uuid REFERENCES public.users(id),
+  created_at timestamp with time zone DEFAULT now(),
+  constraint circulars_pkey PRIMARY KEY (id)
+);
+
+ALTER TABLE public.circulars ENABLE ROW LEVEL SECURITY;
+
+-- Students can view circulars from their college
+CREATE POLICY "Students can view college circulars" 
+  ON public.circulars FOR SELECT 
+  TO authenticated 
+  USING (
+    college_id = (SELECT college_id FROM users WHERE id = auth.uid())
+  );
+
+-- TPOs can manage circulars for their college
+CREATE POLICY "TPOs can manage college circulars" 
+  ON public.circulars FOR ALL 
+  TO authenticated 
+  USING (
+    college_id = (SELECT college_id FROM users WHERE id = auth.uid())
+    AND (SELECT role FROM users WHERE id = auth.uid()) = 'tpo'
+  );
+
+
 -- Insert a default college and super admin for initial setup (Optional/Manual)
 -- INSERT INTO colleges (name) VALUES ('Default Technical College');

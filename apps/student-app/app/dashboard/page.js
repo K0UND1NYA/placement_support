@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/api";
 import TextType from "@/components/TextType";
 import ParticleCard from "@/components/ParticleCard";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Bell } from "lucide-react";
+import { Bell, Megaphone, User, X } from "lucide-react";
 
 const months = [
   "January",
@@ -44,6 +44,8 @@ export default function StudentDashboard() {
   const [courseActivity, setCourseActivity] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState([]);
+  const [circulars, setCirculars] = useState([]);
+  const [selectedCircular, setSelectedCircular] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [eventTitle, setEventTitle] = useState("");
@@ -83,13 +85,16 @@ export default function StudentDashboard() {
       try {
         setLoading(true);
         // Execute all API calls in parallel
-        const [statsData, scoresData, eventsData] = await Promise.all([
+        const [statsData, scoresData, eventsData, circularsData] = await Promise.all([
           apiFetch("/analytics/student/dashboard-stats").catch(err => { console.error("Stats fetch failed:", err); return {}; }),
           apiFetch("/analytics/student/my-scores").catch(err => { console.error("Scores fetch failed:", err); return []; }),
-          apiFetch("/events").catch(err => { console.error("Events fetch failed:", err); return []; })
+          apiFetch("/events").catch(err => { console.error("Events fetch failed:", err); return []; }),
+          apiFetch("/circulars").catch(err => { console.error("Circulars fetch failed:", err); return []; })
         ]);
 
         if (!mounted) return;
+
+        setCirculars(circularsData || []);
 
         // 1. Process Stats
         const upcoming = statsData?.upcoming_exams ?? 0;
@@ -287,6 +292,67 @@ export default function StudentDashboard() {
         </ParticleCard>
       </div>
 
+      {/* Circular Notifications Section */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-6 px-2">
+            <div>
+                <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                    <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
+                    Recent Circulars
+                </h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 ml-4">Important updates from TPO office</p>
+            </div>
+        </div>
+
+        {circulars.length === 0 ? (
+            <div className="bg-white rounded-[2.5rem] p-12 border-2 border-dashed border-slate-100 flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 mb-4">
+                    <Megaphone size={24} />
+                </div>
+                <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">No recent circulars</p>
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {circulars.slice(0, 3).map((circular) => (
+                    <ParticleCard key={circular.id} glowColor="59, 130, 246" particleCount={5}>
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 flex flex-col h-full group">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                    <Megaphone size={18} />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                                        {new Date(circular.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                    </p>
+                                </div>
+                            </div>
+                            <h3 className="text-lg font-black text-slate-800 mb-3 tracking-tight group-hover:text-blue-600 transition-colors line-clamp-1">
+                                {circular.title}
+                            </h3>
+                            <p className="text-slate-500 text-sm font-medium leading-relaxed mb-6 line-clamp-3">
+                                {circular.content}
+                            </p>
+                            <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                                        <User size={12} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{circular.creator_name || 'TPO Office'}</span>
+                                </div>
+                                <button 
+                                    onClick={() => setSelectedCircular(circular)}
+                                    className="text-xs font-black text-blue-600 uppercase tracking-widest hover:translate-x-1 transition-transform"
+                                >
+                                    Read More →
+                                </button>
+                            </div>
+                        </div>
+                    </ParticleCard>
+                ))}
+            </div>
+        )}
+      </div>
+
       {/* Event Modal */}
       {showAddForm && selectedDate && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[100] p-4">
@@ -411,6 +477,57 @@ export default function StudentDashboard() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Circular Detail Modal */}
+      {selectedCircular && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-[2.5rem] p-8 max-w-2xl w-full shadow-2xl animate-in zoom-in duration-300 max-h-[90vh] overflow-hidden flex flex-col relative">
+                <button 
+                    onClick={() => setSelectedCircular(null)}
+                    className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
+                >
+                    <X size={20} />
+                </button>
+
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
+                        <Megaphone size={28} />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                            {selectedCircular.title}
+                        </h3>
+                        <div className="flex items-center gap-3 mt-1">
+                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                                {new Date(selectedCircular.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </span>
+                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                By {selectedCircular.creator_name || 'TPO Office'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar lg:pr-4">
+                    <div className="prose prose-slate max-w-none">
+                        <p className="text-slate-600 text-lg font-medium leading-relaxed whitespace-pre-wrap">
+                            {selectedCircular.content}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-50 flex justify-end">
+                    <button
+                        onClick={() => setSelectedCircular(null)}
+                        className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                    >
+                        Close Portal
+                    </button>
+                </div>
+            </div>
         </div>
       )}
     </DashboardLayout>

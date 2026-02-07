@@ -13,6 +13,7 @@ import {
     Menu,
     X,
     PlusCircle,
+    MessageSquare,
 } from "lucide-react";
 import TextType from "@/components/TextType";
 
@@ -35,7 +36,6 @@ export function DashboardLayout({ children }) {
     const pathname = usePathname();
     const [user, setUser] = useState(null);
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-    const [showNotifications, setShowNotifications] = useState(false);
 
     // Mock Notifications
     const notifications = [
@@ -73,6 +73,7 @@ export function DashboardLayout({ children }) {
         { href: "/dashboard/exams", label: "Manage Exams", icon: <ClipboardList size={18} /> },
         { href: "/dashboard/tint", label: "TINT Toolkit", icon: <Wrench size={18} /> },
         { href: "/dashboard/students", label: "Students", icon: <Users size={18} /> },
+        { href: "/dashboard/circulars", label: "Circulars", icon: <MessageSquare size={18} /> },
     ];
 
     const NotificationsPanel = () => (
@@ -157,15 +158,6 @@ export function DashboardLayout({ children }) {
                 </span>
 
                 <div className="flex items-center gap-3 relative">
-                    <button
-                        onClick={() => setShowNotifications(!showNotifications)}
-                        className="p-2 text-slate-400 hover:text-blue-600 transition-colors relative"
-                    >
-                        <Bell size={18} />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    {showNotifications && <div className="absolute top-12 right-0 w-72"><NotificationsPanel /></div>}
-
                     <div className="w-9 h-9 bg-blue-600 rounded-2xl flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-blue-200">
                         {user?.name?.charAt(0) || "T"}
                     </div>
@@ -237,18 +229,6 @@ export function DashboardLayout({ children }) {
                             <PlusCircle size={18} />
                             <span>Create Quiz</span>
                         </Link>
-
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowNotifications(!showNotifications)}
-                                className="relative p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all"
-                            >
-                                <Bell size={20} />
-                                <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                            </button>
-                            {showNotifications && <NotificationsPanel />}
-                        </div>
-
                         <div className="flex items-center gap-3 group cursor-pointer">
                             <div className="flex flex-col items-end">
                                 <span className="text-sm font-bold text-slate-900 leading-none">{user?.name}</span>
