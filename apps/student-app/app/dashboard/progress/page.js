@@ -8,39 +8,44 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 /* ---------- helpers ---------- */
 const formatYearLabel = (year) => {
   if (year === 'All') return 'All Years';
-  if (year === 1) return '1st Year';
-  if (year === 2) return '2nd Year';
-  if (year === 3) return '3rd Year';
-  return `${year}th Year`;
+  if (!year) return 'N/A';
+  
+  // Handle already formatted strings or non-numeric
+  const numericYear = parseInt(year);
+  if (isNaN(numericYear)) return year;
+
+  if (numericYear === 1) return '1st Year';
+  if (numericYear === 2) return '2nd Year';
+  if (numericYear === 3) return '3rd Year';
+  if (numericYear === 4) return '4th Year';
+  return `${numericYear}th Year`;
 };
 
 export default function StudentProgressPage() {
   const [rankings, setRankings] = useState([]);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
-  const [year, setYear] = useState('All');
+  const [selectedExamId, setSelectedExamId] = useState('All');
 
   useEffect(() => {
     const userData = sessionStorage.getItem('user');
     if (userData) setCurrentUser(JSON.parse(userData));
 
-    apiFetch('/analytics/student/rankings')
+    // Fetch exams for selection
+    apiFetch('/exams')
+      .then(setExams)
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const query = selectedExamId !== 'All' ? `?examId=${selectedExamId}` : '';
+    apiFetch(`/analytics/student/rankings${query}`)
       .then(setRankings)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
-
-  /* ---------- derive years from data ---------- */
-  const availableYears = useMemo(() => {
-    const yrs = rankings.map(r => r.year).filter(Boolean);
-    return ['All', ...Array.from(new Set(yrs)).sort((a, b) => a - b)];
-  }, [rankings]);
-
-  /* ---------- frontend filtering ---------- */
-  const filteredRankings = useMemo(() => {
-    if (year === 'All') return rankings;
-    return rankings.filter(r => r.year === Number(year));
-  }, [rankings, year]);
+  }, [selectedExamId]);
 
   const getRankIcon = (rank) => {
     if (rank === 1) return <Trophy className="text-yellow-500" size={18} />;
@@ -68,24 +73,25 @@ export default function StudentProgressPage() {
           </h2>
         </div>
 
-        {/* Year Filter */}
+        {/* Exam Filter */}
         <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-2 text-slate-500">
             <Filter size={16} />
             <span className="text-xs font-black text-black uppercase tracking-widest">
-              Year
+              Filter by Exam
             </span>
           </div>
 
           <select
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
+            value={selectedExamId}
+            onChange={(e) => setSelectedExamId(e.target.value)}
             className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50
               border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-black"
           >
-            {availableYears.map(y => (
-              <option key={y} value={y}>
-                {formatYearLabel(y)}
+            <option value="All">Global Rankings (All Exams)</option>
+            {exams.map(exam => (
+              <option key={exam.id} value={exam.id}>
+                {exam.title}
               </option>
             ))}
           </select>
@@ -96,15 +102,15 @@ export default function StudentProgressPage() {
           <div className="flex justify-center py-20">
             <div className="animate-spin h-8 w-8 border-b-4 border-blue-600 rounded-full" />
           </div>
-        ) : filteredRankings.length === 0 ? (
+        ) : rankings.length === 0 ? (
           <div className="bg-white p-16 rounded-2xl border border-dashed border-slate-200 text-center">
             <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
-              No data for selected year
+              No participation data available
             </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredRankings.map(student => (
+            {rankings.map(student => (
               <div
                 key={student.student_id}
                 className={`rounded-2xl p-4 border shadow-sm transition-all ${getRowStyle(student.student_id)}`}
@@ -132,13 +138,23 @@ export default function StudentProgressPage() {
                   </div>
 
                   {/* Right */}
-                  <div className="text-right">
-                    <p className="text-lg font-black text-slate-900">
-                      {student.total_score}
-                    </p>
-                    <p className="text-[10px] font-bold uppercase text-slate-400">
-                      Points
-                    </p>
+                  <div className="text-right flex items-center gap-6">
+                    <div className="text-right">
+                       <p className="text-[10px] font-bold uppercase text-slate-400 mb-0.5">
+                        Exams
+                      </p>
+                      <p className="text-sm font-black text-slate-700">
+                        {student.exams_taken}
+                      </p>
+                    </div>
+                    <div className="text-right min-w-[60px]">
+                      <p className="text-[10px] font-bold uppercase text-slate-400 mb-0.5">
+                        Points
+                      </p>
+                      <p className="text-lg font-black text-blue-600">
+                        {student.total_score}
+                      </p>
+                    </div>
                   </div>
 
                 </div>

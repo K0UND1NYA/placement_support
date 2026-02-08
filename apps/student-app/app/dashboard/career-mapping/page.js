@@ -224,7 +224,7 @@ const StudentCareer = () => {
 
                 {roadmap.youtubeResources && (
                   <div className="mt-6">
-                    <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-black">
                       <svg
                         viewBox="0 0 24 24"
                         fill="currentColor"
@@ -235,7 +235,7 @@ const StudentCareer = () => {
                       </svg>
                       Recommended Video Courses
                     </h4>
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="grid sm:grid-cols-2 gap-3 text-black">
                       {roadmap.youtubeResources.map((resource, i) => (
                         <a
                           key={i}
@@ -247,7 +247,7 @@ const StudentCareer = () => {
                           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:bg-red-200 transition-colors">
                             <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-red-600 border-b-[5px] border-b-transparent ml-0.5" />
                           </div>
-                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                          <span className="text-sm font-medium text-black group-hover:text-primary transition-colors">
                             {resource.title}
                           </span>
                           <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto group-hover:translate-x-0.5 transition-transform" />

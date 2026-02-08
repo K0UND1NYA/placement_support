@@ -12,7 +12,7 @@ router.get('/', authenticateJWT, collegeIsolation, async (req: AuthRequest, res:
             SELECT e.*, 
                    (SELECT COUNT(*)::int FROM questions WHERE exam_id = e.id) as question_count,
                    EXISTS (SELECT 1 FROM attempts WHERE exam_id = e.id AND student_id = $1 AND submitted_at IS NOT NULL) as is_attempted,
-                   (SELECT score FROM attempts WHERE exam_id = e.id AND student_id = $1 ORDER BY created_at DESC LIMIT 1) as score
+                   (SELECT score FROM attempts WHERE exam_id = e.id AND student_id = $1 AND submitted_at IS NOT NULL ORDER BY submitted_at DESC LIMIT 1) as score
             FROM exams e
             WHERE 1=1
         `;
