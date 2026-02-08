@@ -69,20 +69,44 @@ router.get('/student/dashboard-stats', authenticateJWT, authorizeRoles('student'
 router.get('/student/rankings', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
     try {
         const collegeId = req.user?.college_id;
+        const { examId } = req.query;
 
-        // Fetch all students in the college with their total scores
-        const result = await query(`
-            SELECT 
-                u.id as student_id,
-                u.name,
-                COALESCE(SUM(a.score), 0) as total_score,
-                COUNT(a.id) as exams_taken
-            FROM users u
-            LEFT JOIN attempts a ON u.id = a.student_id AND a.submitted_at IS NOT NULL
-            WHERE u.role = 'student' AND u.college_id = $1
-            GROUP BY u.id, u.name
-            ORDER BY total_score DESC, u.name ASC
-        `, [collegeId]);
+        let sql = '';
+        const params: any[] = [collegeId];
+
+        if (examId && examId !== 'All') {
+            // Rankings for a specific exam
+            sql = `
+                SELECT 
+                    u.id as student_id,
+                    u.name,
+                    u.year,
+                    COALESCE(a.score, 0) as total_score,
+                    CASE WHEN a.submitted_at IS NOT NULL THEN 1 ELSE 0 END as exams_taken
+                FROM users u
+                LEFT JOIN attempts a ON u.id = a.student_id AND a.exam_id = $2 AND a.submitted_at IS NOT NULL
+                WHERE u.role = 'student' AND u.college_id = $1
+                ORDER BY total_score DESC, u.name ASC
+            `;
+            params.push(examId);
+        } else {
+            // Global rankings
+            sql = `
+                SELECT 
+                    u.id as student_id,
+                    u.name,
+                    u.year,
+                    COALESCE(SUM(a.score), 0) as total_score,
+                    COUNT(a.id) as exams_taken
+                FROM users u
+                LEFT JOIN attempts a ON u.id = a.student_id AND a.submitted_at IS NOT NULL
+                WHERE u.role = 'student' AND u.college_id = $1
+                GROUP BY u.id, u.name, u.year
+                ORDER BY total_score DESC, u.name ASC
+            `;
+        }
+
+        const result = await query(sql, params);
 
         // Add rank to each student
         const rankings = result.rows.map((student: any, index: number) => ({
