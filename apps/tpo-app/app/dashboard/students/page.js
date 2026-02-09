@@ -18,7 +18,7 @@ export default function StudentsPage() {
 
   return (
     <div className="p-8">
-      <h2 className="text-2xl font-bold mb-8">Enrolled Students</h2>
+      <h2 className="text-2xl font-bold mb-8 text-black">Enrolled Students</h2>
 
       {loading ? (
         <p className="text-gray-500">Loading student directory...</p>

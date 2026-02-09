@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { Clock, Shield, Send, ChevronRight, CheckCircle2, ChevronLeft, Layout, MousePointer2, AlertTriangle, XCircle, Info } from 'lucide-react';
 import gsap from 'gsap';
+import Modal from '@/components/Modal';
 
 export default function ExamAttemptPage() {
   const { id: examId } = useParams();
@@ -21,6 +22,7 @@ export default function ExamAttemptPage() {
   const [tabViolations, setTabViolations] = useState(0);
   const [copyViolations, setCopyViolations] = useState(0);
   const [isTerminated, setIsTerminated] = useState(false);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false });
   const router = useRouter();
   
   const mainContentRef = useRef(null);
@@ -246,28 +248,60 @@ export default function ExamAttemptPage() {
 
   const handleSubmit = async (auto = false, terminationReason = null) => {
     if (!attemptId || isSubmitting) return;
-    if (!auto && !confirm('Are you sure you want to submit?')) return;
     
-    setIsSubmitting(true);
-    try {
-      await apiFetch(`/exams/${examId}/attempt`, {
-        method: 'POST',
-        body: JSON.stringify({ 
-          answers, 
-          attempt_id: attemptId,
-          is_termination: !!terminationReason,
-          termination_reason: terminationReason
-        }),
-      });
-      
-      if (!terminationReason) {
-        router.push('/dashboard');
+    // Internal function to perform actual submission
+    const performSubmission = async () => {
+      setIsSubmitting(true);
+      try {
+        await apiFetch(`/exams/${examId}/attempt`, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            answers, 
+            attempt_id: attemptId,
+            is_termination: !!terminationReason,
+            termination_reason: terminationReason
+          }),
+        });
+        
+        setModalConfig({ isOpen: false });
+        if (!terminationReason) {
+          router.push('/dashboard');
+        }
+      } catch (err) {
+        console.error('Submission technical error:', err);
+        // Only reset isSubmitting if it wasn't a termination (which is permanent)
+        if (!terminationReason) setIsSubmitting(false);
       }
-    } catch (err) {
-      console.error('Submission technical error:', err);
-      // Only reset isSubmitting if it wasn't a termination (which is permanent)
-      if (!terminationReason) setIsSubmitting(false);
+    };
+
+    if (!auto) {
+      const unansweredCount = questions.length - Object.keys(answers).length;
+      if (unansweredCount > 0) {
+        setModalConfig({
+          isOpen: true,
+          type: 'warning',
+          title: 'Unanswered Questions',
+          message: `You have ${unansweredCount} unanswered questions. Are you sure you want to end your exam session now?`,
+          confirmText: 'Submit Anyway',
+          onConfirm: performSubmission,
+          onClose: () => setModalConfig({ isOpen: false })
+        });
+        return;
+      }
+
+      setModalConfig({
+        isOpen: true,
+        type: 'info',
+        title: 'Submit Exam',
+        message: 'Are you sure you want to end this exam session? Once submitted, you cannot change your answers.',
+        confirmText: 'Submit Exam',
+        onConfirm: performSubmission,
+        onClose: () => setModalConfig({ isOpen: false })
+      });
+      return;
     }
+
+    performSubmission();
   };
 
   const formatTime = (seconds) => {
@@ -395,7 +429,7 @@ export default function ExamAttemptPage() {
                   <ChevronLeft size={24} />
                </button>
 
-               {activeQuestion < questions.length - 1 ? (
+                {activeQuestion < questions.length - 1 ? (
                  <button 
                     onClick={() => setActiveQuestion(prev => Math.min(questions.length - 1, prev + 1))}
                     className="flex items-center gap-3 px-10 py-5 rounded-3xl bg-slate-950 text-white font-black uppercase tracking-widest text-sm hover:bg-blue-600 transition-all shadow-xl hover:shadow-blue-200"
@@ -405,12 +439,7 @@ export default function ExamAttemptPage() {
                  </button>
                ) : (
                  <button 
-                    onClick={() => {
-                        if (Object.keys(answers).length < questions.length) {
-                           if (!confirm(`Warning: ${questions.length - Object.keys(answers).length} questions unanswered. Submit anyway?`)) return;
-                        }
-                        handleSubmit(false);
-                    }}
+                    onClick={() => handleSubmit(false)}
                     disabled={isSubmitting}
                     className="flex items-center gap-3 px-10 py-5 rounded-3xl bg-blue-600 text-white font-black uppercase tracking-widest text-sm hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
                  >
@@ -498,6 +527,8 @@ export default function ExamAttemptPage() {
            </div>
         </div>
       )}
+      {/* Modal Portal */}
+      <Modal {...modalConfig} isLoading={isSubmitting} />
     </div>
   );
 }
