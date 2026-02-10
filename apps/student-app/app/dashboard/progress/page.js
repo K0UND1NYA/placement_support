@@ -9,7 +9,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 const formatYearLabel = (year) => {
   if (year === 'All') return 'All Years';
   if (!year) return 'N/A';
-  
+
   // Handle already formatted strings or non-numeric
   const numericYear = parseInt(year);
   if (isNaN(numericYear)) return year;
@@ -54,10 +54,15 @@ export default function StudentProgressPage() {
     return <span className="font-black text-slate-500 text-sm">{rank}</span>;
   };
 
-  const getRowStyle = (studentId) =>
-    currentUser?.id === studentId
+  const getRowStyle = (rank, studentId) => {
+    if (rank === 1) return 'bg-yellow-100 border-yellow-200 shadow-sm';
+    if (rank === 2) return 'bg-slate-100 border-slate-300 shadow-sm';
+    if (rank === 3) return 'bg-orange-50 border-orange-200 shadow-sm';
+
+    return currentUser?.id === studentId
       ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-100'
       : 'bg-white border-slate-100 hover:bg-slate-50';
+  };
 
   return (
     <DashboardLayout>
@@ -113,7 +118,7 @@ export default function StudentProgressPage() {
             {rankings.map(student => (
               <div
                 key={student.student_id}
-                className={`rounded-2xl p-4 border shadow-sm transition-all ${getRowStyle(student.student_id)}`}
+                className={`rounded-lg p-4 border shadow-sm transition-all ${getRowStyle(student.rank, student.student_id)}`}
               >
                 <div className="flex items-center justify-between">
 
@@ -140,7 +145,7 @@ export default function StudentProgressPage() {
                   {/* Right */}
                   <div className="text-right flex items-center gap-6">
                     <div className="text-right">
-                       <p className="text-[10px] font-bold uppercase text-slate-400 mb-0.5">
+                      <p className="text-[10px] font-bold uppercase text-slate-400 mb-0.5">
                         Exams
                       </p>
                       <p className="text-sm font-black text-slate-700">

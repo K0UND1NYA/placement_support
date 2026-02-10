@@ -163,8 +163,8 @@ const StudentCareer = () => {
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                       {role.category}
                     </span>
-                    <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                      {role.averageSalary}
+                    <span className="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                      Demand: {role.demandLevel}
                     </span>
                   </div>
                   <CardTitle className="text-lg group-hover:text-primary transition-colors">
@@ -280,7 +280,7 @@ const StudentCareer = () => {
                       {/* Milestone Card */}
                       <div
                         onClick={() => toggleMilestone(milestone.id)}
-                        className={`bg-slate-50/80 hover:bg-slate-50 border rounded-xl p-6 transition-all cursor-pointer hover:shadow-md ${milestone.completed ? 'border-slate-100' : 'border-slate-100 opacity-90'
+                        className={`bg-slate-50/80 hover:bg-slate-50 border rounded-lg p-6 transition-all cursor-pointer hover:shadow-md ${milestone.completed ? 'border-slate-100' : 'border-slate-100 opacity-90'
                           } ${isExpanded ? 'ring-2 ring-primary/20 shadow-lg scale-[1.01]' : ''}`}
                       >
                         {/* Week Badge */}

@@ -55,7 +55,7 @@ export default function StudentExamsPage() {
 
     return (
       <div
-        className={`bg-white rounded-[1.75rem] p-5 border border-slate-100 shadow-sm
+        className={`bg-white rounded-lg p-5 border-4 border-slate-100 shadow-sm
         transition-all
         ${clickable ? 'hover:border-blue-100 hover:shadow-md' : 'opacity-70'}
         `}
@@ -130,12 +130,12 @@ export default function StudentExamsPage() {
             {[1, 2, 3].map(i => (
               <div
                 key={i}
-                className="bg-white h-40 rounded-[1.75rem] border border-slate-100 animate-pulse"
+                className="bg-white h-40 rounded-lg border-4 border-slate-100 animate-pulse"
               />
             ))}
           </div>
         ) : exams.length === 0 ? (
-          <div className="bg-white rounded-[1.75rem] p-10 border border-slate-100 text-center">
+          <div className="bg-white rounded-lg p-10 border-4 border-slate-100 text-center">
             <p className="text-slate-400 font-bold text-sm">
               No exams assigned.
             </p>

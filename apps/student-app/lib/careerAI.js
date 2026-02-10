@@ -9,7 +9,7 @@ export const availableRoles = [
     description:
       'Build beautiful, responsive, and performant user interfaces using modern web technologies.',
     details: 'As a Frontend Developer, you are the architect of the user experience. You will translate designs into code, optimize performance, and ensure cross-browser compatibility. This path focuses on React, Next.js, and modern CSS frameworks.',
-    averageSalary: '$80k - $140k',
+    demandLevel: 'Very High',
     requiredSkills: ['React', 'Next.js', 'Tailwind CSS', 'TypeScript'],
     youtubeResources: [
       { title: 'Frontend Developer Roadmap', url: 'https://www.youtube.com/watch?v=bgIJ29d2f78' },
@@ -25,7 +25,7 @@ export const availableRoles = [
     description:
       'Design and implement scalable server-side logic, databases, and APIs.',
     details: 'Backend Developers are the engine of web applications. You will handle data storage, security, authentication, and server-side logic. This roadmap guides you through Node.js, databases, and cloud deployment.',
-    averageSalary: '$85k - $150k',
+    demandLevel: 'High',
     requiredSkills: ['Node.js', 'PostgreSQL', 'Docker', 'AWS'],
     youtubeResources: [
       { title: 'Backend Developer Roadmap', url: 'https://www.youtube.com/watch?v=tN6oJu2DqCM' },
@@ -41,7 +41,7 @@ export const availableRoles = [
     description:
       'Master both frontend and backend technologies to build complete web applications.',
     details: 'Full Stack Developers bridge the gap between user interface and server logic. You will learn to build end-to-end applications, manage databases, and deploy to the cloud. A versatile role highly valued in the industry.',
-    averageSalary: '$90k - $160k',
+    demandLevel: 'Extremely High',
     requiredSkills: ['React', 'Node.js', 'Database Design', 'System Architecture'],
     youtubeResources: [
       { title: 'Web Development Full Course', url: 'https://www.youtube.com/watch?v=G3e-cpL7ofc' },
@@ -56,7 +56,7 @@ export const availableRoles = [
     category: 'Data Science',
     description: 'Interpret complex data to help companies make better business decisions.',
     details: 'Data Analysts collect, process, and perform statistical analyses on large datasets. You will discover how data can be used to answer questions and solve problems. This path focuses on SQL, Python, Excel, and Visualization tools.',
-    averageSalary: '$70k - $125k',
+    demandLevel: 'Growing',
     requiredSkills: ['SQL', 'Python', 'Tableau', 'Excel'],
     youtubeResources: [
       { title: 'Complete Data Analyst Roadmap', url: 'https://www.youtube.com/watch?v=8JJ101D3knE' },
@@ -71,7 +71,7 @@ export const availableRoles = [
     category: 'Development',
     description: 'Build robust, scalable enterprise applications using Java and modern frontend frameworks.',
     details: 'Combine the power of Java for backend logic with dynamic frontends. You will master Spring Boot for server-side development and React/Angular for the user interface.',
-    averageSalary: '$90k - $150k',
+    demandLevel: 'Stable',
     requiredSkills: ['Java', 'Spring Boot', 'React', 'SQL'],
     youtubeResources: [
       { title: 'Java Full Stack Roadmap', url: 'https://www.youtube.com/watch?v=x0rN9sFpXm8' },
@@ -86,7 +86,7 @@ export const availableRoles = [
     category: 'Development',
     description: 'Leverage Python’s versatility to build powerful web applications with Django or Flask.',
     details: 'Python is known for its readability and efficiency. As a Python Full Stack Developer, you will use Django or Flask for the backend and modern JavaScript frameworks for the frontend.',
-    averageSalary: '$90k - $150k',
+    demandLevel: 'Very High',
     requiredSkills: ['Python', 'Django', 'React', 'PostgreSQL'],
     youtubeResources: [
       { title: 'Python Web Dev Roadmap', url: 'https://www.youtube.com/watch?v=Q_qYkZ2cMug' },
@@ -101,7 +101,7 @@ export const availableRoles = [
     category: 'Design',
     description: 'Design intuitive, aesthetically pleasing, and user-friendly digital experiences.',
     details: 'UI/UX Designers focus on the look and feel of a product. You will conduct user research, create wireframes, and design high-fidelity prototypes using tools like Figma.',
-    averageSalary: '$75k - $130k',
+    demandLevel: 'High',
     requiredSkills: ['Figma', 'Wireframing', 'Prototyping', 'User Research'],
     youtubeResources: [
       { title: 'UI/UX Design Roadmap', url: 'https://www.youtube.com/watch?v=c9Wg6Cb_YlU' },
@@ -116,7 +116,7 @@ export const availableRoles = [
     category: 'Security',
     description: 'Protect systems, networks, and programs from digital attacks.',
     details: 'Cyber Security Specialists are the defenders of the digital world. You will learn to identify vulnerabilities, monitor for threats, and implement security measures.',
-    averageSalary: '$90k - $160k',
+    demandLevel: 'Critical',
     requiredSkills: ['Network Security', 'Linux', 'Python', 'Ethical Hacking'],
     youtubeResources: [
       { title: 'Cyber Security Roadmap', url: 'https://www.youtube.com/watch?v=3Kq1MIfTWCE' },

@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/api";
 import TextType from "@/components/TextType";
 import ParticleCard from "@/components/ParticleCard";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Bell, Megaphone, User, X } from "lucide-react";
+import { Bell, Megaphone, User, X, TrendingUp } from "lucide-react";
 
 const months = [
   "January",
@@ -41,6 +41,15 @@ export default function StudentDashboard() {
     availableTests: 0,
     averageScore: 0,
   });
+
+  const getMotivation = (score) => {
+    if (score >= 90) return { text: "Outstanding! You're crushing it! 🚀", gradient: "from-emerald-400 to-teal-500" };
+    if (score >= 75) return { text: "Great job! Keep pushing for the top! 🔥", gradient: "from-blue-400 to-indigo-500" };
+    if (score >= 50) return { text: "Good progress! Steady improvements win the race. 💪", gradient: "from-amber-400 to-orange-500" };
+    return { text: "Complete the pending test to improve your average score. 📈", gradient: "from-purple-300 to-pink-400" };
+  };
+
+  const motivation = getMotivation(stats.averageScore);
   const [courseActivity, setCourseActivity] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState([]);
@@ -162,23 +171,59 @@ export default function StudentDashboard() {
 
   return (
     <DashboardLayout>
+      {/* Motivation Banner */}
+      <div className="mb-6 p-6 rounded-lg bg-white border border-slate-100 text-slate-900 shadow-sm flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 transition-all hover:shadow-lg hover:border-indigo-200 hover:-translate-y-1">
+        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+          <TrendingUp size={24} />
+        </div>
+        <div>
+          <h2 className="text-lg font-black tracking-tight">Current Academic Progress: {stats.averageScore}%</h2>
+          <p className="font-medium opacity-90">{motivation.text}</p>
+        </div>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <StatCard title="Total Test" value={stats.totalTests} />
-        <StatCard title="Completed Test" value={stats.completedTests} />
-        <StatCard title="Available Tests" value={stats.availableTests} />
+        <StatCard
+          title="Total Test"
+          value={stats.totalTests}
+          hoverTextColor="group-hover:text-indigo-600"
+          hoverBorderColor="hover:border-indigo-600"
+          hoverShadow="hover:shadow-indigo-100/50"
+          glowColor="79, 70, 229"
+        />
+        <StatCard
+          title="Completed Test"
+          value={stats.completedTests}
+          hoverTextColor="group-hover:text-indigo-600"
+          hoverBorderColor="hover:border-indigo-600"
+          hoverShadow="hover:shadow-indigo-100/50"
+          glowColor="79, 70, 229"
+        />
+        <StatCard
+          title="Available Tests"
+          value={stats.availableTests}
+          hoverTextColor="group-hover:text-indigo-600"
+          hoverBorderColor="hover:border-indigo-600"
+          hoverShadow="hover:shadow-indigo-100/50"
+          glowColor="79, 70, 229"
+        />
         <StatCard
           title="Average Score"
           value={stats.averageScore ? `${stats.averageScore}%` : "0%"}
+          hoverTextColor="group-hover:text-indigo-600"
+          hoverBorderColor="hover:border-indigo-600"
+          hoverShadow="hover:shadow-indigo-100/50"
+          glowColor="79, 70, 229"
         />
       </div>
 
       {/* Courses and Calendar */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border-4 border-slate-100 flex flex-col h-[360px] transition-all duration-300 hover:border-blue-200 hover:shadow-lg hover:-translate-y-1">
+        <div className="bg-white rounded-lg p-6 shadow-sm border-4 border-slate-100 flex flex-col h-[360px] transition-all duration-300 hover:border-indigo-200 hover:shadow-lg hover:-translate-y-1">
           <h2 className="text-lg font-black mb-4 text-slate-800 tracking-tight flex items-center gap-2">
-            <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
-            Performance Analytics
+            <span className="w-2 h-6 bg-indigo-600 rounded-full"></span>
+            Progress Overview
           </h2>
 
           {/* Line Chart Container */}
@@ -199,12 +244,12 @@ export default function StudentDashboard() {
                   <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full p-2 overflow-visible">
                     <defs>
                       <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2563eb" stopOpacity="1" />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.8" />
+                        <stop offset="0%" stopColor="#4f46e5" stopOpacity="1" />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.8" />
                       </linearGradient>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
                       </linearGradient>
                     </defs>
 
@@ -237,7 +282,7 @@ export default function StudentDashboard() {
                         cy={100 - test.score}
                         r="2.5"
                         fill="white"
-                        stroke="#2563eb"
+                        stroke="#4f46e5"
                         strokeWidth="1.5"
                         className="hover:r-4 transition-all duration-300 cursor-pointer"
                       >
@@ -248,7 +293,7 @@ export default function StudentDashboard() {
                 ) : courseActivity.length === 1 ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-4 h-4 rounded-full bg-blue-600 animate-ping mb-4 mx-auto"></div>
+                      <div className="w-4 h-4 rounded-full bg-indigo-600 animate-ping mb-4 mx-auto"></div>
                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{courseActivity[0].score}% Accuracy</p>
                     </div>
                   </div>
@@ -280,7 +325,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Calendar */}
-        <ParticleCard glowColor="29, 78, 216" particleCount={20} className="transition-all duration-300 hover:-translate-y-1">
+        <ParticleCard glowColor="79, 70, 229" particleCount={20} className="transition-all duration-300 hover:-translate-y-1">
           <EventCalendar
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
@@ -297,7 +342,7 @@ export default function StudentDashboard() {
         <div className="flex items-center justify-between mb-6 px-2">
           <div>
             <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-              <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
+              <span className="w-2 h-6 bg-indigo-600 rounded-full"></span>
               Recent Circulars
             </h2>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 ml-4">Important updates from TPO office</p>
@@ -305,7 +350,7 @@ export default function StudentDashboard() {
         </div>
 
         {circulars.length === 0 ? (
-          <div className="bg-white rounded-[2.5rem] p-12 border-2 border-dashed border-slate-100 flex flex-col items-center text-center">
+          <div className="bg-white rounded-lg p-12 border-2 border-dashed border-slate-100 flex flex-col items-center text-center">
             <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 mb-4">
               <Megaphone size={24} />
             </div>
@@ -314,10 +359,10 @@ export default function StudentDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {circulars.slice(0, 3).map((circular) => (
-              <ParticleCard key={circular.id} glowColor="59, 130, 246" particleCount={5} className="transition-all duration-300 hover:-translate-y-1">
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border-4 border-slate-50 transition-all duration-300 flex flex-col h-full group hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200">
+              <ParticleCard key={circular.id} glowColor="99, 102, 241" particleCount={5} className="transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-white p-8 rounded-lg shadow-sm border-4 border-slate-50 transition-all duration-300 flex flex-col h-full group hover:shadow-xl hover:shadow-indigo-100/50 hover:border-indigo-200">
                   <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                       <Megaphone size={18} />
                     </div>
                     <div className="text-right">
@@ -326,7 +371,7 @@ export default function StudentDashboard() {
                       </p>
                     </div>
                   </div>
-                  <h3 className="text-lg font-black text-slate-800 mb-3 tracking-tight group-hover:text-blue-600 transition-colors line-clamp-1">
+                  <h3 className="text-lg font-black text-slate-800 mb-3 tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1">
                     {circular.title}
                   </h3>
                   <p className="text-slate-500 text-sm font-medium leading-relaxed mb-6 line-clamp-3">
@@ -334,14 +379,14 @@ export default function StudentDashboard() {
                   </p>
                   <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                      <div className="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
                         <User size={12} />
                       </div>
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{circular.creator_name || 'TPO Office'}</span>
                     </div>
                     <button
                       onClick={() => setSelectedCircular(circular)}
-                      className="text-xs font-black text-blue-600 uppercase tracking-widest hover:translate-x-1 transition-transform"
+                      className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:translate-x-1 transition-transform"
                     >
                       Read More →
                     </button>
@@ -356,7 +401,7 @@ export default function StudentDashboard() {
       {/* Event Modal */}
       {showAddForm && selectedDate && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-300">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-black text-slate-900 tracking-tight">
                 {months[currentDate.getMonth()]} {selectedDate}
@@ -369,7 +414,7 @@ export default function StudentDashboard() {
 
             {/* Existing Events */}
             <div className="mb-8">
-              <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-4">
+              <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4">
                 Scheduled Events
               </h4>
               <div className="space-y-3 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
@@ -389,9 +434,9 @@ export default function StudentDashboard() {
                     .map((event) => (
                       <div
                         key={event.id}
-                        className={`flex items-center justify-between p-4 rounded-2xl border-l-4 group ${event.visibility === 'everyone'
-                          ? 'bg-blue-50/50 border-blue-600'
-                          : 'bg-indigo-50/50 border-indigo-600'
+                        className={`flex items-center justify-between p-4 rounded-xl border-l-4 group ${event.visibility === 'everyone'
+                          ? 'bg-indigo-50/50 border-indigo-600'
+                          : 'bg-purple-50/50 border-purple-600'
                           }`}
                       >
                         <div className="flex flex-col">
@@ -434,7 +479,7 @@ export default function StudentDashboard() {
                   placeholder="Enter event title..."
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
-                  className="flex-1 text-slate-900 bg-slate-50 border-none rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-blue-600 transition-all outline-none"
+                  className="flex-1 text-slate-900 bg-slate-50 border-none rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-indigo-600 transition-all outline-none"
                 />
                 <button
                   onClick={async () => {
@@ -469,7 +514,7 @@ export default function StudentDashboard() {
                       }
                     }
                   }}
-                  className="bg-blue-600 text-white px-6 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95"
+                  className="bg-indigo-600 text-white px-6 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-indigo-200 transition-all active:scale-95"
                 >
                   Save
                 </button>
@@ -480,64 +525,66 @@ export default function StudentDashboard() {
       )}
 
       {/* Circular Detail Modal */}
-      {selectedCircular && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] p-8 max-w-2xl w-full shadow-2xl animate-in zoom-in duration-300 max-h-[90vh] overflow-hidden flex flex-col relative">
-            <button
-              onClick={() => setSelectedCircular(null)}
-              className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-                <Megaphone size={28} />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
-                  {selectedCircular.title}
-                </h3>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                    {new Date(selectedCircular.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                  <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    By {selectedCircular.creator_name || 'TPO Office'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar lg:pr-4">
-              <div className="prose prose-slate max-w-none">
-                <p className="text-slate-600 text-lg font-medium leading-relaxed whitespace-pre-wrap">
-                  {selectedCircular.content}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-slate-50 flex justify-end">
+      {
+        selectedCircular && (
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-lg p-8 max-w-2xl w-full shadow-2xl animate-in zoom-in duration-300 max-h-[90vh] overflow-hidden flex flex-col relative">
               <button
                 onClick={() => setSelectedCircular(null)}
-                className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
               >
-                Close Portal
+                <X size={20} />
               </button>
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+                  <Megaphone size={28} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                    {selectedCircular.title}
+                  </h3>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                      {new Date(selectedCircular.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
+                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      By {selectedCircular.creator_name || 'TPO Office'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar lg:pr-4">
+                <div className="prose prose-slate max-w-none">
+                  <p className="text-slate-600 text-lg font-medium leading-relaxed whitespace-pre-wrap">
+                    {selectedCircular.content}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-50 flex justify-end">
+                <button
+                  onClick={() => setSelectedCircular(null)}
+                  className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                >
+                  Close Portal
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </DashboardLayout>
+        )
+      }
+    </DashboardLayout >
   );
 }
 
-function StatCard({ title, value }) {
+function StatCard({ title, value, hoverTextColor, hoverBorderColor, accentBorderColor, hoverShadow, glowColor }) {
   return (
-    <ParticleCard glowColor="59, 130, 246" particleCount={8} className="transition-all duration-300 hover:-translate-y-1">
-      <div className="bg-white p-6 rounded-[2rem] shadow-sm border-4 border-slate-50 transition-all duration-300 group hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 group-hover:text-blue-600 transition-colors">
+    <ParticleCard glowColor={glowColor} particleCount={8} className="transition-all duration-300 hover:-translate-y-1">
+      <div className={`bg-white p-6 rounded-lg shadow-sm border border-slate-100 border-l-4 border-l-blue-600 transition-all duration-300 group hover:shadow-xl ${hoverShadow} ${hoverBorderColor}`}>
+        <p className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ${hoverTextColor} transition-colors`}>
           {title}
         </p>
         <p className="text-3xl font-black text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{value}</p>
@@ -583,7 +630,7 @@ function EventCalendar({
   };
 
   return (
-    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border-4 border-slate-100 h-[360px] flex flex-col transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
+    <div className="bg-white rounded-lg p-6 shadow-sm border-4 border-slate-100 h-[360px] flex flex-col transition-all duration-300 hover:border-indigo-200 hover:shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-black text-slate-900 tracking-tight capitalize">
           {months[currentDate.getMonth()]} {currentDate.getFullYear()}
@@ -595,7 +642,7 @@ function EventCalendar({
                 new Date(currentDate.getFullYear(), currentDate.getMonth() - 1),
               )
             }
-            className="p-3 hover:bg-blue-600 hover:text-white text-slate-400 rounded-2xl transition-all duration-300 shadow-sm"
+            className="p-3 hover:bg-indigo-600 hover:text-white text-slate-400 rounded-xl transition-all duration-300 shadow-sm"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
           </button>
@@ -605,7 +652,7 @@ function EventCalendar({
                 new Date(currentDate.getFullYear(), currentDate.getMonth() + 1),
               )
             }
-            className="p-3 hover:bg-blue-600 hover:text-white text-slate-400 rounded-2xl transition-all duration-300 shadow-sm"
+            className="p-3 hover:bg-indigo-600 hover:text-white text-slate-400 rounded-xl transition-all duration-300 shadow-sm"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
           </button>
@@ -616,7 +663,7 @@ function EventCalendar({
         {daysOfWeek.map((day) => (
           <div
             key={day}
-            className="text-center text-[10px] font-black text-blue-600 uppercase tracking-widest"
+            className="text-center text-[10px] font-black text-indigo-600 uppercase tracking-widest"
           >
             {day}
           </div>
@@ -632,11 +679,11 @@ function EventCalendar({
               ? "opacity-0 cursor-default"
               : isEventDay(day)
                 ? events.some(e => e.date === day && e.month === currentDate.getMonth() && e.visibility === 'everyone')
-                  ? "bg-blue-600 text-white shadow-xl shadow-blue-200 ring-4 ring-blue-50"
-                  : "bg-indigo-600 text-white shadow-xl shadow-indigo-200 ring-4 ring-indigo-50"
+                  ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 ring-4 ring-indigo-50"
+                  : "bg-purple-600 text-white shadow-xl shadow-purple-200 ring-4 ring-purple-50"
                 : isToday(day)
-                  ? "bg-blue-50 text-blue-700 ring-2 ring-blue-200"
-                  : "bg-slate-50 text-slate-600 hover:bg-white hover:shadow-lg hover:shadow-slate-100 hover:text-blue-600"
+                  ? "bg-indigo-50 text-indigo-700 ring-2 ring-indigo-200"
+                  : "bg-slate-50 text-slate-600 hover:bg-white hover:shadow-lg hover:shadow-slate-100 hover:text-indigo-600"
               }`}
           >
             {day}

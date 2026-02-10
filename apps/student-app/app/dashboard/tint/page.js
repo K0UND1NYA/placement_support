@@ -51,10 +51,9 @@ export default function StudentTintPage() {
               key={cat.key}
               onClick={() => setSelectedCategory(cat.key)}
               className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all
-                ${
-                  selectedCategory === cat.key
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ${selectedCategory === cat.key
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }
               `}
             >
@@ -69,12 +68,12 @@ export default function StudentTintPage() {
             {[1, 2, 3, 4].map(i => (
               <div
                 key={i}
-                className="bg-white h-36 rounded-[1.5rem] border border-slate-100 animate-pulse"
+                className="bg-white h-36 rounded-lg border border-slate-100 animate-pulse"
               />
             ))}
           </div>
         ) : filteredMaterials.length === 0 ? (
-          <div className="bg-white rounded-[1.5rem] p-10 border border-slate-100 text-center">
+          <div className="bg-white rounded-lg p-10 border border-slate-100 text-center">
             <p className="text-slate-400 font-bold text-sm">
               No materials available for this category.
             </p>
@@ -84,7 +83,7 @@ export default function StudentTintPage() {
             {filteredMaterials.map(m => (
               <div
                 key={m.id}
-                className="bg-white rounded-[1.5rem] p-4 border border-slate-100 shadow-sm
+                className="bg-white rounded-lg p-4 border border-slate-100 shadow-sm
                 hover:shadow-md hover:border-blue-100 transition-all"
               >
                 <div className="flex items-start gap-3 mb-3">
