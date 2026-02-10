@@ -21,8 +21,8 @@ export function SidebarItem({ icon, label, active, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer font-semibold transition-all duration-200
-      ${active ? "bg-blue-100 text-blue-700 shadow-sm" : "hover:bg-slate-100 text-slate-600"}`}
+      className={`flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer font-semibold transition-all duration-200
+      ${active ? "bg-indigo-50 text-indigo-700 shadow-sm" : "hover:bg-slate-100 text-slate-600"}`}
     >
       {icon}
       {label}
@@ -77,7 +77,7 @@ export function DashboardLayout({ children }) {
   ];
 
   const NotificationsPanel = () => (
-    <div className="absolute top-full right-0 mt-3 w-80 bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-6 z-[100] animate-in slide-in-from-top-2 fade-in duration-200">
+    <div className="absolute top-full right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 z-[100] animate-in slide-in-from-top-2 fade-in duration-200">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-black text-slate-800 tracking-tight">Recent Circulars</h3>
         <button onClick={() => setShowNotifications(false)}>
@@ -93,8 +93,8 @@ export function DashboardLayout({ children }) {
         ) : (
           circulars.map((n) => (
             <div key={n.id} className="p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 transition cursor-pointer flex gap-3 items-start group">
-              <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <Megaphone size={14} className="text-blue-600 group-hover:text-white" />
+              <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                <Megaphone size={14} className="text-indigo-600 group-hover:text-white" />
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-800 leading-tight mb-1 line-clamp-2">{n.title}</p>
@@ -110,7 +110,7 @@ export function DashboardLayout({ children }) {
         <Link
           href="/dashboard"
           onClick={() => setShowNotifications(false)}
-          className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors"
+          className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors"
         >
           View all on dashboard
         </Link>
@@ -119,12 +119,12 @@ export function DashboardLayout({ children }) {
   );
 
   return (
-    <div className="h-screen bg-[#e8edff] flex overflow-hidden font-sans">
+    <div className="h-screen bg-slate-50 flex overflow-hidden font-sans">
       {/* Sidebar (Desktop Only) */}
       <aside className="hidden lg:block w-64 bg-white shadow-2xl p-6 z-20 flex-shrink-0 relative overflow-y-auto custom-scrollbar">
         <div className="relative group cursor-pointer mb-4 flex items-center justify-center">
           <img src="https://lh3.googleusercontent.com/u/0/d/1f4qSF9eLf0IFr_bIiajaCJJkyuW2l_OB" alt="Platform Logo" className="h-28 w-auto object-contain transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute -inset-3 bg-blue-100 rounded-full blur-xl opacity-30" />
+          <div className="absolute -inset-3 bg-indigo-100 rounded-full blur-xl opacity-30" />
         </div>
         <nav className="space-y-3">
           {navItems.map((item) => (
@@ -151,12 +151,12 @@ export function DashboardLayout({ children }) {
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md shadow-sm z-30 flex items-center px-6 gap-4">
         <button
           onClick={() => setMobileSidebarOpen(true)}
-          className="p-2 -ml-2 text-blue-700 hover:bg-blue-50 rounded-xl transition-colors"
+          className="p-2 -ml-2 text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors"
         >
           <span className="text-2xl">☰</span>
         </button>
 
-        <span className="flex-1 text-center text-sm font-bold truncate text-blue-600">
+        <span className="flex-1 text-center text-sm font-bold truncate text-indigo-600">
           <TextType
             text={`Hello, ${user?.name || "Student"}`}
             typingSpeed={60}
@@ -164,14 +164,14 @@ export function DashboardLayout({ children }) {
             cursorCharacter="_"
             className="inline"
             showCursor
-            textColors={["blue"]}
+            textColors={["#4f46e5"]}
           />
         </span>
 
         <div className="flex items-center gap-3 relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 text-slate-400 hover:text-blue-600 transition-colors"
+            className="relative p-2 text-slate-400 hover:text-indigo-600 transition-colors"
           >
             <Bell size={18} />
             {circulars.length > 0 && (
@@ -179,7 +179,7 @@ export function DashboardLayout({ children }) {
             )}
           </button>
           {showNotifications && <NotificationsPanel />}
-          <div className="w-9 h-9 bg-blue-600 rounded-2xl flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-blue-200">
+          <div className="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-indigo-200">
             {user?.name?.charAt(0) || "U"}
           </div>
         </div>
@@ -194,7 +194,7 @@ export function DashboardLayout({ children }) {
           />
           <aside className="fixed top-0 left-0 h-full w-[280px] bg-white z-50 p-8 lg:hidden animate-in slide-in-from-left duration-300">
             <div className="flex items-center justify-between mb-10">
-              <span className="font-black text-xl text-blue-700 tracking-tight">Navigation</span>
+              <span className="font-black text-xl text-indigo-700 tracking-tight">Navigation</span>
               <button
                 onClick={() => setMobileSidebarOpen(false)}
                 className="text-slate-400 hover:text-slate-600"
@@ -233,7 +233,7 @@ export function DashboardLayout({ children }) {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-4 bg-[#f8fbff]">
+      <main className="flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-4 bg-slate-50/50">
         {/* Desktop Top Bar (Hidden on Mobile) */}
         <div className="hidden lg:flex justify-between items-center mb-2">
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -252,7 +252,7 @@ export function DashboardLayout({ children }) {
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all"
+                className="relative p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"
               >
                 <Bell size={20} />
                 {circulars.length > 0 && (
@@ -268,9 +268,9 @@ export function DashboardLayout({ children }) {
             >
               <div className="flex flex-col items-end">
                 <span className="text-sm font-bold text-slate-900 leading-none">{user?.name}</span>
-                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Student Account</span>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Student Account</span>
               </div>
-              <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-sm font-black text-white shadow-xl shadow-blue-200 group-hover:rotate-6 transition-transform">
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-sm font-black text-white shadow-xl shadow-indigo-200 group-hover:rotate-6 transition-transform">
                 {user?.name?.charAt(0) || "U"}
               </div>
             </Link>
