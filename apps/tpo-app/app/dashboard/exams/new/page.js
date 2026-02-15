@@ -102,8 +102,8 @@ export default function NewExamPage() {
           title,
           duration,
           code,
-          start_time: startTime || null,
-          end_time: endTime || null
+          start_time: startTime ? new Date(startTime).toISOString() : null,
+          end_time: endTime ? new Date(endTime).toISOString() : null,
         }),
       });
 
