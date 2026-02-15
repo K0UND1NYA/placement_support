@@ -286,3 +286,78 @@ CREATE POLICY "TPOs can manage college circulars"
 
 -- Insert a default college and super admin for initial setup (Optional/Manual)
 -- INSERT INTO colleges (name) VALUES ('Default Technical College');
+
+-- 14. AI Mock Interviews
+CREATE TABLE public.mock_interviews (
+  id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+  college_id uuid REFERENCES public.colleges(id),
+  title text NOT NULL,
+  domain text NOT NULL, -- e.g., 'Full Stack', 'Data Science'
+  topic text NOT NULL, -- Specific focus
+  description text,
+  difficulty text DEFAULT 'Medium',
+  start_time timestamp with time zone NOT NULL,
+  end_time timestamp with time zone NOT NULL,
+  created_by uuid REFERENCES public.users(id),
+  created_at timestamp with time zone DEFAULT now(),
+  constraint mock_interviews_pkey PRIMARY KEY (id)
+);
+
+ALTER TABLE public.mock_interviews ENABLE ROW LEVEL SECURITY;
+
+-- TPOs manage their college's interviews
+CREATE POLICY "TPOs can manage mock interviews" 
+  ON public.mock_interviews FOR ALL 
+  TO authenticated 
+  USING (
+    college_id = (SELECT college_id FROM users WHERE id = auth.uid())
+    AND (SELECT role FROM users WHERE id = auth.uid()) = 'tpo'
+  );
+
+-- Students view interviews from their college
+CREATE POLICY "Students can view mock interviews" 
+  ON public.mock_interviews FOR SELECT 
+  TO authenticated 
+  USING (
+    college_id = (SELECT college_id FROM users WHERE id = auth.uid())
+  );
+
+
+-- 15. Mock Interview Attempts (Conversations)
+CREATE TABLE public.mock_interview_attempts (
+  id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+  mock_interview_id uuid REFERENCES public.mock_interviews(id) ON DELETE CASCADE,
+  student_id uuid REFERENCES public.users(id),
+  conversation_history jsonb DEFAULT '[]'::jsonb, -- Array of {role: 'user'|'assistant', content: string}
+  feedback jsonb, -- AI generated feedback
+  score integer,
+  status text DEFAULT 'in_progress', -- 'in_progress', 'completed'
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  constraint mock_interview_attempts_pkey PRIMARY KEY (id),
+  UNIQUE(mock_interview_id, student_id) -- One attempt per interview slot (optional constraint)
+);
+
+ALTER TABLE public.mock_interview_attempts ENABLE ROW LEVEL SECURITY;
+
+-- Students manage their own attempts
+CREATE POLICY "Students can manage own interview attempts" 
+  ON public.mock_interview_attempts FOR ALL 
+  TO authenticated 
+  USING (student_id = auth.uid());
+
+-- TPOs view attempts for their college's interviews
+CREATE POLICY "TPOs can view interview attempts" 
+  ON public.mock_interview_attempts FOR SELECT 
+  TO authenticated 
+  USING (
+    EXISTS (
+      SELECT 1 FROM mock_interviews mi
+      WHERE mi.id = mock_interview_attempts.mock_interview_id
+      AND mi.college_id = (SELECT college_id FROM users WHERE id = auth.uid())
+      AND (SELECT role FROM users WHERE id = auth.uid()) = 'tpo'
+    )
+  );
+
+CREATE INDEX IF NOT EXISTS idx_mock_interviews_college_id ON public.mock_interviews (college_id);
+CREATE INDEX IF NOT EXISTS idx_mock_interview_attempts_student_id ON public.mock_interview_attempts (student_id);
