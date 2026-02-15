@@ -45,18 +45,21 @@ Requirements:
 
 Questions:`;
 
-        const response = await hfClient.textGeneration({
-            model: 'mistralai/Mistral-7B-Instruct-v0.3',
-            inputs: prompt,
-            parameters: {
-                max_new_tokens: 3000,
-                return_full_text: false,
-                temperature: 0.8,
-                repetition_penalty: 1.2,
-            }
+        const response = await hfClient.chatCompletion({
+            model: 'openai/gpt-oss-120b',
+            messages: [
+                { role: "user", content: prompt }
+            ],
+            max_tokens: 3000,
+            temperature: 0.8,
         });
 
-        let content = response.generated_text.trim();
+
+        if (!response.choices || !response.choices[0] || !response.choices[0].message.content) {
+            throw new Error('No content received from AI');
+        }
+
+        let content = response.choices[0].message.content.trim();
 
         // Robust JSON extraction
         const jsonMatch = content.match(/\[\s*\{.*\}\s*\]/s);
