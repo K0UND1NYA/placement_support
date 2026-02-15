@@ -14,7 +14,7 @@
     "clsx": "^2.1.1",
     "gsap": "^3.14.2",
     "lucide-react": "^0.473.0",
-    "next": "16.1.4",
+    "next": "^16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^2.6.0"

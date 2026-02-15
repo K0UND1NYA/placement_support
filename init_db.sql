@@ -76,6 +76,8 @@ create table public.exams (
   code text unique,
   duration integer not null,
   created_by uuid null,
+  start_time timestamp with time zone null,
+  end_time timestamp with time zone null,
   created_at timestamp with time zone null default now(),
   constraint exams_pkey primary key (id),
   constraint exams_college_id_fkey foreign KEY (college_id) references colleges (id),

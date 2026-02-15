@@ -17,6 +17,7 @@ import analyticsRouter from './routes/analytics';
 import profileRouter from './routes/profile';
 import eventsRouter from './routes/events';
 import circularsRouter from './routes/circulars';
+import aiRouter from './routes/ai';
 import { startOTPCleanupScheduler } from './utils/otpCleanup';
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/analytics', analyticsRouter);
 app.use('/profile', profileRouter);
 app.use('/events', eventsRouter);
 app.use('/circulars', circularsRouter);
+app.use('/ai', aiRouter);
 
 // Health check
 app.get('/health', (req, res) => {
