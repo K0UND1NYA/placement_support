@@ -8,6 +8,29 @@ const router = express.Router();
 router.post('/start', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
     const { exam_id } = req.body;
     try {
+        // Fetch exam details to check scheduling
+        const examResult = await query('SELECT start_time, end_time FROM exams WHERE id = $1', [exam_id]);
+        if (examResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Exam not found' });
+        }
+
+        const exam = examResult.rows[0];
+        const now = new Date();
+
+        if (exam.start_time && new Date(exam.start_time) > now) {
+            return res.status(403).json({
+                error: 'Exam has not started yet',
+                start_time: exam.start_time
+            });
+        }
+
+        if (exam.end_time && new Date(exam.end_time) < now) {
+            return res.status(403).json({
+                error: 'Exam has already ended',
+                end_time: exam.end_time
+            });
+        }
+
         // Check for existing active attempt
         const existing = await query(
             'SELECT id, created_at FROM attempts WHERE exam_id = $1 AND student_id = $2 AND submitted_at IS NULL',
@@ -15,9 +38,9 @@ router.post('/start', authenticateJWT, authorizeRoles('student'), async (req: Au
         );
 
         if (existing.rows.length > 0) {
-            return res.json({ 
+            return res.json({
                 attempt_id: existing.rows[0].id,
-                started_at: existing.rows[0].created_at 
+                started_at: existing.rows[0].created_at
             });
         }
 
@@ -26,7 +49,7 @@ router.post('/start', authenticateJWT, authorizeRoles('student'), async (req: Au
             'INSERT INTO attempts (exam_id, student_id, score, submitted_at) VALUES ($1, $2, $3, $4) RETURNING id, created_at',
             [exam_id, req.user?.id, 0, null]
         );
-        res.status(201).json({ 
+        res.status(201).json({
             attempt_id: result.rows[0].id,
             started_at: result.rows[0].created_at
         });
@@ -41,7 +64,7 @@ router.get('/:attemptId/logs', authenticateJWT, authorizeRoles('tpo', 'admin'), 
     const { attemptId } = req.params;
     try {
         // Optional: Verify attempt belongs to TPO's college (omitted for brevity, relying on previous checks in UI flow)
-        
+
         const result = await query(
             'SELECT * FROM integrity_logs WHERE attempt_id = $1 ORDER BY created_at DESC',
             [attemptId]

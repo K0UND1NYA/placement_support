@@ -20,10 +20,14 @@ export default function StudentExamsPage() {
   // Frontend-only state logic
   const getExamState = (exam) => {
     const now = new Date();
-    const end = new Date(exam.end_time);
+    const start = exam.start_time ? new Date(exam.start_time) : null;
+    const end = exam.end_time ? new Date(exam.end_time) : null;
 
     if (exam.is_attempted) return 'ATTENDED';
-    if (now > end) return 'NOT_AVAILABLE';
+
+    if (start && now < start) return 'UPCOMING';
+    if (end && now > end) return 'NOT_AVAILABLE';
+
     return 'AVAILABLE';
   };
 
@@ -31,13 +35,15 @@ export default function StudentExamsPage() {
     const styles = {
       AVAILABLE: 'bg-blue-50 text-blue-600',
       ATTENDED: 'bg-green-50 text-green-600',
+      UPCOMING: 'bg-amber-50 text-amber-600',
       NOT_AVAILABLE: 'bg-slate-100 text-slate-500',
     };
 
     const labels = {
       AVAILABLE: 'Available',
       ATTENDED: 'Attended',
-      NOT_AVAILABLE: 'Not Available',
+      UPCOMING: 'Upcoming',
+      NOT_AVAILABLE: 'Closed',
     };
 
     return (
@@ -74,9 +80,21 @@ export default function StudentExamsPage() {
         </h3>
 
         {/* Meta */}
-        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">
-          <Clock size={12} className="text-blue-400" />
-          {exam.duration} min
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <Clock size={12} className="text-blue-400" />
+            {exam.duration} min
+          </div>
+          {(exam.start_time || exam.end_time) && (
+            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter leading-tight">
+              {exam.start_time && (
+                <div>Starts: {new Date(exam.start_time).toLocaleString()}</div>
+              )}
+              {exam.end_time && (
+                <div>Ends: {new Date(exam.end_time).toLocaleString()}</div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Action */}

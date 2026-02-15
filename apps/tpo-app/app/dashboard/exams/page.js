@@ -57,6 +57,7 @@ export default function ExamsPage() {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Duration</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Schedule</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Created At</th>
                 <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -68,11 +69,25 @@ export default function ExamsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-mono tracking-wider">{exam.code || 'N/A'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{exam.duration} mins</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-bold">{exam.question_count || 0} Qs</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
+                    {exam.start_time ? (
+                      <div>
+                        <span className="font-bold">S:</span> {new Date(exam.start_time).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                        {exam.end_time && (
+                          <div>
+                            <span className="font-bold">E:</span> {new Date(exam.end_time).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="italic">Always Available</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{new Date(exam.created_at).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link href={`/dashboard/exams/${exam.id}/results`} className="text-blue-600 hover:text-blue-800 font-bold mr-4">Results</Link>
                     <Link href={`/dashboard/exams/${exam.id}/integrity`} className="text-amber-600 hover:text-amber-800 font-bold mr-4">Integrity Report</Link>
-                    <button 
+                    <button
                       onClick={() => handleDeleteClick(exam.id)}
                       className="text-red-500 hover:text-red-700 font-bold"
                     >
