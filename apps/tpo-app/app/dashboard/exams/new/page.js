@@ -20,7 +20,7 @@ export default function NewExamPage() {
   const [aiParams, setAiParams] = useState({
     pattern: 'Standard MCQ',
     type: 'Aptitude',
-    count: 5,
+    count: 20,
     difficulty: 'Medium',
     description: ''
   });
@@ -202,14 +202,14 @@ export default function NewExamPage() {
         </div>
 
         {/* Improved Smart Quiz Generator Section */}
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-purple-200 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-3xl -mr-32 -mt-32 rounded-full pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-3xl -ml-32 -mb-32 rounded-full pointer-events-none"></div>
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-200 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl -mr-32 -mt-32 rounded-full pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/5 blur-3xl -ml-32 -mb-32 rounded-full pointer-events-none"></div>
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-purple-50 p-2 rounded-xl border border-purple-100">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <div className="bg-blue-50 p-2 rounded-xl border border-blue-100">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-slate-800">Smart Quiz Generator</h3>
@@ -239,8 +239,8 @@ export default function NewExamPage() {
                             setAiParams({ ...aiParams, type: newTypes.join(', ') });
                           }}
                           className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${isSelected
-                            ? 'bg-purple-100 border-purple-300 text-purple-700'
-                            : 'bg-white border-slate-200 text-slate-500 hover:border-purple-200 hover:text-purple-600'
+                            ? 'bg-blue-100 border-blue-300 text-blue-700'
+                            : 'bg-white border-slate-200 text-slate-500 hover:border-blue-200 hover:text-blue-600'
                             }`}
                         >
                           {isSelected && <span className="mr-1">✓</span>}
@@ -251,7 +251,7 @@ export default function NewExamPage() {
                   </div>
                   <input
                     type="text"
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-purple-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white text-sm text-slate-900"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white text-sm text-slate-900"
                     placeholder="Type to add custom topics..."
                     value={aiParams.type}
                     onChange={(e) => setAiParams({ ...aiParams, type: e.target.value })}
@@ -261,7 +261,7 @@ export default function NewExamPage() {
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Difficulty</label>
                   <select
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-purple-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white appearance-none text-slate-900"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white appearance-none text-slate-900"
                     value={aiParams.difficulty}
                     onChange={(e) => setAiParams({ ...aiParams, difficulty: e.target.value })}
                   >
@@ -275,7 +275,7 @@ export default function NewExamPage() {
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Additional Context (Optional)</label>
                   <textarea
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-purple-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white h-[118px] resize-none text-slate-900"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white h-[118px] resize-none text-slate-900"
                     placeholder="e.g. Focus on React hooks, or TCS NQT 2024 pattern..."
                     value={aiParams.description}
                     onChange={(e) => setAiParams({ ...aiParams, description: e.target.value })}
@@ -289,12 +289,12 @@ export default function NewExamPage() {
                 <div className="w-full md:w-auto">
                   <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Questions Count</label>
                   <div className="flex items-center gap-3">
-                    {[3, 5, 10, 15].map(n => (
+                    {[15, 20, 30, 60].map(n => (
                       <button
                         key={n}
                         type="button"
                         onClick={() => setAiParams({ ...aiParams, count: n })}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border ${aiParams.count === n ? 'bg-purple-600 border-purple-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-purple-300 hover:text-purple-600'}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border ${aiParams.count === n ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600'}`}
                       >
                         {n}
                       </button>
@@ -307,7 +307,7 @@ export default function NewExamPage() {
                 type="button"
                 disabled={aiLoading}
                 onClick={handleAIGenerate}
-                className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-purple-500/30 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-blue-500/30 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {aiLoading ? (
                   <>
