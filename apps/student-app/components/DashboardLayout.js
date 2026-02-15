@@ -13,6 +13,7 @@ import {
   Map,
   X,
   Megaphone,
+  Mic,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import TextType from "@/components/TextType";
@@ -71,6 +72,7 @@ export function DashboardLayout({ children }) {
   const navItems = [
     { href: "/dashboard", label: "Home", icon: <Home size={18} /> },
     { href: "/dashboard/exams", label: "Exams", icon: <ClipboardList size={18} /> },
+    { href: "/dashboard/mock-interviews", label: "Mock Interviews", icon: <Mic size={18} /> },
     { href: "/dashboard/tint", label: "Materials", icon: <BookOpen size={18} /> },
     { href: "/dashboard/progress", label: "Progress", icon: <TrendingUp size={18} /> },
     { href: "/dashboard/career-mapping", label: "Career Mapping", icon: <Map size={18} /> },

@@ -14,6 +14,7 @@ import {
     X,
     PlusCircle,
     MessageSquare,
+    Mic,
 } from "lucide-react";
 import TextType from "@/components/TextType";
 
@@ -71,6 +72,7 @@ export function DashboardLayout({ children }) {
     const navItems = [
         { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
         { href: "/dashboard/exams", label: "Manage Exams", icon: <ClipboardList size={18} /> },
+        { href: "/dashboard/mock-interviews", label: "Mock Interviews", icon: <Mic size={18} /> },
         { href: "/dashboard/tint", label: "TINT Toolkit", icon: <Wrench size={18} /> },
         { href: "/dashboard/students", label: "Students", icon: <Users size={18} /> },
         { href: "/dashboard/circulars", label: "Circulars", icon: <MessageSquare size={18} /> },

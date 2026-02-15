@@ -1,149 +1,70 @@
-'use client';
+import { X, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
-import React, { useEffect, useRef } from 'react';
-import { X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
-import gsap from 'gsap';
-
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title, 
-  message, 
-  type = 'info', 
-  confirmText = 'Confirm', 
-  cancelText = 'Cancel', 
-  showCancel = true,
-  isLoading = false
-}) => {
-  const modalRef = useRef(null);
-  const overlayRef = useRef(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      // Entrance animation
-      gsap.fromTo(overlayRef.current, 
-        { opacity: 0 }, 
-        { opacity: 1, duration: 0.3, ease: 'power2.out' }
-      );
-      gsap.fromTo(modalRef.current, 
-        { scale: 0.9, opacity: 0, y: 20 }, 
-        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.7)' }
-      );
-    }
-  }, [isOpen]);
-
+export default function Modal({ isOpen, onClose, onConfirm, title, message, type = "info", confirmText = "Confirm", cancelText = "Cancel" }) {
   if (!isOpen) return null;
 
   const typeConfig = {
     danger: {
-      bg: 'bg-red-50',
-      iconColor: 'bg-red-100 text-red-600',
-      buttonBg: 'bg-red-600 hover:bg-red-700 shadow-red-200',
-      borderColor: 'border-red-100',
-      icon: <AlertTriangle size={24} />
-    },
-    warning: {
-      bg: 'bg-amber-50',
-      iconColor: 'bg-amber-100 text-amber-600',
-      buttonBg: 'bg-amber-600 hover:bg-amber-700 shadow-amber-200',
-      borderColor: 'border-amber-100',
-      icon: <AlertTriangle size={24} />
-    },
-    info: {
-      bg: 'bg-blue-50',
-      iconColor: 'bg-blue-100 text-blue-600',
-      buttonBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-200',
-      borderColor: 'border-blue-100',
-      icon: <Info size={24} />
+      icon: <AlertTriangle size={24} className="text-red-600" />,
+      bg: "bg-red-100",
+      btn: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
     },
     success: {
-      bg: 'bg-emerald-50',
-      iconColor: 'bg-emerald-100 text-emerald-600',
-      buttonBg: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200',
-      borderColor: 'border-emerald-100',
-      icon: <CheckCircle2 size={24} />
-    }
+      icon: <CheckCircle size={24} className="text-green-600" />,
+      bg: "bg-green-100",
+      btn: "bg-green-600 hover:bg-green-700 focus:ring-green-500",
+    },
+    info: {
+      icon: <Info size={24} className="text-blue-600" />,
+      bg: "bg-blue-100",
+      btn: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
+    },
   };
 
   const config = typeConfig[type] || typeConfig.info;
 
-  const handleConfirm = () => {
-    gsap.to(modalRef.current, { 
-      scale: 0.95, 
-      opacity: 0, 
-      duration: 0.2, 
-      onComplete: onConfirm 
-    });
-  };
-
-  const handleClose = () => {
-    gsap.to(modalRef.current, { 
-      scale: 0.95, 
-      opacity: 0, 
-      duration: 0.2, 
-      onComplete: onClose 
-    });
-  };
-
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-      <div 
-        ref={overlayRef}
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity" 
-        onClick={handleClose} 
-      />
-      
-      <div 
-        ref={modalRef}
-        className="relative w-full max-w-md transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all border border-slate-100"
-      >
-        <div className="p-8 sm:p-10">
-          <div className="flex items-start justify-between mb-8">
-            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${config.iconColor} shadow-sm`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden scale-100 animate-in zoom-in-95 duration-200">
+        <div className="p-6">
+          <div className="flex items-start gap-4">
+            <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${config.bg}`}>
               {config.icon}
             </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-slate-900 leading-6 mb-2">
+                {title}
+              </h3>
+              <p className="text-sm text-slate-500">
+                {message}
+              </p>
+            </div>
             <button 
-              onClick={handleClose}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-500 transition-colors"
             >
               <X size={20} />
             </button>
           </div>
+        </div>
 
-          <div className="space-y-4">
-            <h3 className="text-2xl font-black text-slate-900 leading-tight">
-              {title}
-            </h3>
-            <p className="text-slate-500 font-medium leading-relaxed">
-              {message}
-            </p>
-          </div>
-
-          <div className="mt-10 flex flex-col sm:flex-row-reverse gap-3">
-            <button
-              onClick={handleConfirm}
-              disabled={isLoading}
-              className={`flex-1 inline-flex justify-center items-center rounded-2xl px-6 py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${config.buttonBg}`}
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : confirmText}
-            </button>
-            {showCancel && (
-              <button
-                onClick={handleClose}
-                disabled={isLoading}
-                className="flex-1 inline-flex justify-center items-center rounded-2xl bg-slate-50 px-6 py-4 text-sm font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {cancelText}
-              </button>
-            )}
-          </div>
+        <div className="bg-slate-50 px-6 py-4 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-white text-slate-700 font-bold rounded-lg border border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={() => {
+              if (onConfirm) onConfirm();
+            }}
+            className={`px-4 py-2 text-white font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm transition-colors ${config.btn}`}
+          >
+            {confirmText}
+          </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default Modal;
+}
