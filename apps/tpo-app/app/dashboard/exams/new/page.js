@@ -201,52 +201,81 @@ export default function NewExamPage() {
           </div>
         </div>
 
-        {/* Improved AI Section */}
-        <div className="bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 p-8 rounded-3xl border border-blue-700 shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 opacity-10 blur-3xl -mr-32 -mt-32 group-hover:bg-indigo-500 transition-all duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500 opacity-10 blur-3xl -ml-32 -mb-32 group-hover:bg-blue-500 transition-all duration-700"></div>
+        {/* Improved Smart Quiz Generator Section */}
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-purple-200 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-3xl -mr-32 -mt-32 rounded-full pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-3xl -ml-32 -mb-32 rounded-full pointer-events-none"></div>
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/20">
-                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <div className="bg-purple-50 p-2 rounded-xl border border-purple-100">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
               </div>
               <div>
-                <h3 className="text-xl font-black text-white tracking-tight">AI Content Generator</h3>
-                <p className="text-blue-300 text-xs font-bold uppercase tracking-widest opacity-80">Real-time Placement Standards</p>
+                <h3 className="text-xl font-bold text-slate-800">Smart Quiz Generator</h3>
+                <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">AI-Powered Question Generation</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-black text-blue-300 mb-2 uppercase tracking-widest">Topic/Category</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Topic/Category</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {['Quantitative', 'Logical', 'Verbal', 'Technical', 'General Knowledge'].map((topic) => {
+                      const isSelected = aiParams.type.split(',').map(t => t.trim()).includes(topic);
+                      return (
+                        <button
+                          key={topic}
+                          type="button"
+                          onClick={() => {
+                            const currentTypes = aiParams.type ? aiParams.type.split(',').map(t => t.trim()).filter(Boolean) : [];
+                            let newTypes;
+                            if (isSelected) {
+                              newTypes = currentTypes.filter(t => t !== topic);
+                            } else {
+                              newTypes = [...currentTypes, topic];
+                            }
+                            setAiParams({ ...aiParams, type: newTypes.join(', ') });
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${isSelected
+                            ? 'bg-purple-100 border-purple-300 text-purple-700'
+                            : 'bg-white border-slate-200 text-slate-500 hover:border-purple-200 hover:text-purple-600'
+                            }`}
+                        >
+                          {isSelected && <span className="mr-1">✓</span>}
+                          {topic}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <input
                     type="text"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:bg-white/10 focus:border-blue-400 transition-all outline-none backdrop-blur-sm"
-                    placeholder="e.g. JavaScript, Logical Reasoning"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-purple-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white text-sm text-slate-900"
+                    placeholder="Type to add custom topics..."
                     value={aiParams.type}
                     onChange={(e) => setAiParams({ ...aiParams, type: e.target.value })}
                   />
+                  <p className="text-xs text-slate-400 mt-1 ml-1">Select multiple topics or type manually (comma separated)</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-blue-300 mb-2 uppercase tracking-widest">Difficulty</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Difficulty</label>
                   <select
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:bg-white/10 focus:border-blue-400 transition-all outline-none backdrop-blur-sm appearance-none"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-purple-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white appearance-none text-slate-900"
                     value={aiParams.difficulty}
                     onChange={(e) => setAiParams({ ...aiParams, difficulty: e.target.value })}
                   >
-                    <option className="bg-slate-900" value="Easy">Entry Level / Easy</option>
-                    <option className="bg-slate-900" value="Medium">Standard Placement / Medium</option>
-                    <option className="bg-slate-900" value="Hard">Advanced / Hard</option>
+                    <option value="Easy">Entry Level / Easy</option>
+                    <option value="Medium">Standard Placement / Medium</option>
+                    <option value="Hard">Advanced / Hard</option>
                   </select>
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-black text-blue-300 mb-2 uppercase tracking-widest">Additional Context (Optional)</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Additional Context (Optional)</label>
                   <textarea
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:bg-white/10 focus:border-blue-400 transition-all outline-none backdrop-blur-sm h-[115px] resize-none"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-purple-500 focus:ring-0 transition-all outline-none bg-slate-50 focus:bg-white h-[118px] resize-none text-slate-900"
                     placeholder="e.g. Focus on React hooks, or TCS NQT 2024 pattern..."
                     value={aiParams.description}
                     onChange={(e) => setAiParams({ ...aiParams, description: e.target.value })}
@@ -255,17 +284,17 @@ export default function NewExamPage() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-white/10">
-              <div className="flex items-center gap-4">
-                <div>
-                  <label className="block text-xs font-black text-blue-300 mb-2 uppercase tracking-widest">Questions Count</label>
-                  <div className="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-100">
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="w-full md:w-auto">
+                  <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Questions Count</label>
+                  <div className="flex items-center gap-3">
                     {[3, 5, 10, 15].map(n => (
                       <button
                         key={n}
                         type="button"
                         onClick={() => setAiParams({ ...aiParams, count: n })}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${aiParams.count === n ? 'bg-blue-500 text-white shadow-lg' : 'text-blue-200 hover:bg-white/5'}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border ${aiParams.count === n ? 'bg-purple-600 border-purple-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-purple-300 hover:text-purple-600'}`}
                       >
                         {n}
                       </button>
@@ -278,17 +307,17 @@ export default function NewExamPage() {
                 type="button"
                 disabled={aiLoading}
                 onClick={handleAIGenerate}
-                className="w-full md:w-auto bg-blue-500 hover:bg-blue-400 text-white px-10 py-4 rounded-2xl font-black transition-all shadow-xl hover:shadow-blue-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 text-lg uppercase tracking-tighter"
+                className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-purple-500/30 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {aiLoading ? (
                   <>
-                    <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Generating...
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Generating...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                    Generate with AI
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    <span>Generate Quiz</span>
                   </>
                 )}
               </button>
