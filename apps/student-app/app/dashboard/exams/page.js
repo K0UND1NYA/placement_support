@@ -59,11 +59,20 @@ export default function StudentExamsPage() {
     const state = getExamState(exam);
     const clickable = state === 'AVAILABLE';
 
+    // Check availability for review: active if attempted AND current time > end_time
+    const canReview = () => {
+      if (!exam.is_attempted) return false;
+      if (!exam.end_time) return true;
+      return new Date() > new Date(exam.end_time);
+    };
+
+    const isReviewable = canReview();
+
     return (
       <div
         className={`bg-white rounded-lg p-5 border-4 border-slate-100 shadow-sm
-        transition-all
-        ${clickable ? 'hover:border-blue-100 hover:shadow-md' : 'opacity-70'}
+        transition-all duration-300 ease-in-out transform
+        ${clickable ? 'hover:scale-105 hover:border-blue-200 hover:shadow-xl cursor-pointer' : 'opacity-90'}
         `}
       >
         {/* Header */}
@@ -104,7 +113,7 @@ export default function StudentExamsPage() {
             className="flex items-center justify-center gap-2 w-full
             bg-slate-900 text-white py-2.5 rounded-xl
             text-[10px] font-black uppercase tracking-widest
-            hover:bg-blue-600 transition-all"
+            hover:bg-blue-600 transition-all shadow-md hover:shadow-lg"
           >
             Start
             <ChevronRight size={14} />
@@ -115,12 +124,27 @@ export default function StudentExamsPage() {
               {state === 'ATTENDED' ? 'Completed' : 'Closed'}
             </div>
             {state === 'ATTENDED' && (
-              <div className="bg-green-50 text-green-700 p-3 rounded-2xl flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Mark Obtained</span>
-                <span className="text-sm font-black">
-                  {exam.score ?? 0} <span className="text-[10px] opacity-50">/ {exam.question_count}</span>
-                </span>
-              </div>
+              <>
+                <div className="bg-green-50 text-green-700 p-3 rounded-2xl flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Mark Obtained</span>
+                  <span className="text-sm font-black">
+                    {exam.score ?? 0} <span className="text-[10px] opacity-50">/ {exam.question_count}</span>
+                  </span>
+                </div>
+
+                {isReviewable && (
+                  <Link
+                    href={`/dashboard/exams/${exam.id}/review`}
+                    className="flex items-center justify-center gap-2 w-full
+                     bg-yellow-50 text-yellow-700 py-2.5 rounded-xl border-2 border-yellow-200
+                     text-[10px] font-black uppercase tracking-widest
+                     hover:bg-yellow-100 hover:border-yellow-300 transition-all"
+                  >
+                    Review Answers
+                    <ChevronRight size={14} />
+                  </Link>
+                )}
+              </>
             )}
           </div>
         )}

@@ -32,7 +32,7 @@ export default function TPOTintPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Training & Interview Notes Toolkit (TINT)</h2>
-        <button 
+        <button
           onClick={() => setShowUpload(!showUpload)}
           className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
         >
@@ -45,16 +45,16 @@ export default function TPOTintPage() {
           <h3 className="font-semibold text-lg text-black">New Material Details</h3>
           <div>
             <label className="block text-sm font-medium text-gray-700">Title</label>
-            <input 
-              type="text" required className="w-full border rounded-md p-2" 
-              value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
+            <input
+              type="text" required className="w-full border rounded-md p-2 text-gray-900"
+              value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Category</label>
-            <select 
-              className="w-full border rounded-md p-2"
-              value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}
+            <select
+              className="w-full border rounded-md p-2 text-gray-900"
+              value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
             >
               <option value="aptitude">Aptitude</option>
               <option value="logical">Logical Reasoning</option>
@@ -64,9 +64,9 @@ export default function TPOTintPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">File URL (S3/Drive)</label>
-            <input 
-              type="url" required className="w-full border rounded-md p-2" 
-              value={formData.file_url} onChange={e => setFormData({...formData, file_url: e.target.value})}
+            <input
+              type="url" required className="w-full border rounded-md p-2 text-gray-900"
+              value={formData.file_url} onChange={e => setFormData({ ...formData, file_url: e.target.value })}
             />
           </div>
           <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded font-bold">Save Material</button>
