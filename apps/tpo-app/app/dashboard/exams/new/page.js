@@ -11,6 +11,7 @@ export default function NewExamPage() {
   const [duration, setDuration] = useState(30);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
   const [questions, setQuestions] = useState([
     { question: '', options: ['', '', '', ''], correct_answer: '' }
@@ -104,6 +105,7 @@ export default function NewExamPage() {
           code,
           start_time: startTime ? new Date(startTime).toISOString() : null,
           end_time: endTime ? new Date(endTime).toISOString() : null,
+          shuffle_questions: shuffleQuestions
         }),
       });
 
@@ -197,6 +199,21 @@ export default function NewExamPage() {
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
               />
+            </div>
+            <div className="md:col-span-2 flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 mt-4">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={shuffleQuestions}
+                  onChange={(e) => setShuffleQuestions(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+              <div>
+                <span className="block text-sm font-bold text-slate-700">Shuffle Questions</span>
+                <span className="text-[10px] text-slate-500 font-medium">When enabled, questions will appear in random order for each student.</span>
+              </div>
             </div>
           </div>
         </div>
@@ -328,13 +345,31 @@ export default function NewExamPage() {
         <div className="space-y-8">
           <div className="flex justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200">
             <h3 className="text-xl font-bold text-slate-800">Exam Content</h3>
-            <button
-              type="button"
-              onClick={addQuestion}
-              className="bg-white text-blue-600 px-6 py-2 rounded-lg font-bold shadow-sm hover:shadow-md border border-blue-200 transition-all"
-            >
-              + Add Question Manually
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const shuffled = [...questions];
+                  for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                  }
+                  setQuestions(shuffled);
+                }}
+                className="bg-white text-slate-600 px-6 py-2 rounded-lg font-bold shadow-sm hover:shadow-md border border-slate-200 transition-all flex items-center gap-2"
+                title="Shuffle current list order"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Shuffle
+              </button>
+              <button
+                type="button"
+                onClick={addQuestion}
+                className="bg-white text-blue-600 px-6 py-2 rounded-lg font-bold shadow-sm hover:shadow-md border border-blue-200 transition-all"
+              >
+                + Add Question Manually
+              </button>
+            </div>
           </div>
 
           {questions.map((q, qIndex) => (

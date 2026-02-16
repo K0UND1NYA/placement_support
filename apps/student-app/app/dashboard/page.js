@@ -369,6 +369,11 @@ export default function StudentDashboard() {
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
                         {new Date(circular.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
                       </p>
+                      {circular.attachment_url && (
+                        <div className="mt-2 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-tighter text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 animate-pulse">
+                          PDF Included
+                        </div>
+                      )}
                     </div>
                   </div>
                   <h3 className="text-lg font-black text-slate-800 mb-3 tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1">
@@ -562,6 +567,28 @@ export default function StudentDashboard() {
                     {selectedCircular.content}
                   </p>
                 </div>
+                {selectedCircular.attachment_url && (
+                  <div className="mt-8 p-6 bg-indigo-50 rounded-2xl border border-indigo-100 animate-in slide-in-from-bottom-4 duration-500">
+                    <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-3">Attached Resource</h4>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-600 text-white rounded-lg shadow-lg">
+                          <TrendingUp size={16} />
+                        </div>
+                        <span className="text-sm font-bold text-slate-700 truncate max-w-[200px]">Official Attachment</span>
+                      </div>
+                      <a
+                        href={selectedCircular.attachment_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-950 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2"
+                      >
+                        <Megaphone size={14} className="rotate-45" />
+                        Access File
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-8 pt-6 border-t border-slate-50 flex justify-end">

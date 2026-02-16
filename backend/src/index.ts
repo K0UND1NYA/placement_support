@@ -19,6 +19,7 @@ import eventsRouter from './routes/events';
 import circularsRouter from './routes/circulars';
 import aiRouter from './routes/ai';
 import mockInterviewRouter from './routes/mock-interview';
+import uploadsRouter from './routes/uploads';
 
 import { startOTPCleanupScheduler } from './utils/otpCleanup';
 
@@ -27,6 +28,9 @@ const PORT = process.env.BACKEND_PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/auth', authRouter);
@@ -43,6 +47,7 @@ app.use('/circulars', circularsRouter);
 
 app.use('/ai', aiRouter);
 app.use('/mock-interview', mockInterviewRouter);
+app.use('/uploads-manager', uploadsRouter);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -51,7 +56,7 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
-  
+
   // Start OTP cleanup scheduler
   startOTPCleanupScheduler();
 });
