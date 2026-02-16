@@ -111,7 +111,7 @@ router.post('/start', authenticateJWT, authorizeRoles('student'), async (req: Au
         // Validate Time Window
         const interviewResult = await query(`SELECT start_time, end_time FROM mock_interviews WHERE id = $1`, [mock_interview_id]);
         if (interviewResult.rows.length === 0) return res.status(404).json({ error: 'Interview not found' });
-        
+
         const { start_time, end_time } = interviewResult.rows[0];
         const now = new Date();
         const start = new Date(start_time);
@@ -141,12 +141,12 @@ router.post('/start', authenticateJWT, authorizeRoles('student'), async (req: Au
         } catch (err: any) {
             // Check for unique key violation (PostgreSQL code 23505)
             if (err.code === '23505') {
-                 // Fetch and return the existing attempt
-                 const existing = await query(
+                // Fetch and return the existing attempt
+                const existing = await query(
                     `SELECT * FROM mock_interview_attempts WHERE mock_interview_id = $1 AND student_id = $2`,
                     [mock_interview_id, studentId]
-                 );
-                 return res.json(existing.rows[0]);
+                );
+                return res.json(existing.rows[0]);
             }
             throw err; // Re-throw other errors
         }
@@ -174,13 +174,13 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
         if (attemptResult.rows.length === 0) return res.status(404).json({ error: 'Attempt not found' });
         const attempt = attemptResult.rows[0];
         const studentId = req.user?.id;
-        
-        if(attempt.student_id !== studentId) return res.status(403).json({ error: 'Unauthorized' });
+
+        if (attempt.student_id !== studentId) return res.status(403).json({ error: 'Unauthorized' });
 
         let history = attempt.conversation_history || [];
 
         // 2. Prepare AI Context if history is empty (first turn or just system prompt)
-        if (history.length <= 1) { 
+        if (history.length <= 1) {
             const systemPrompt = `You are a strict but fair technical interviewer. 
             Interview Details:
             Domain: ${attempt.domain}
@@ -195,7 +195,7 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
             - Use plain text only. Do NOT use markdown (no **bold** or *italics*).
             - Do NOT write code blocks unless asked.
             - Start by introducing yourself and asking the first question.`;
-            
+
             // Update the system prompt
             history = [{ role: 'system', content: systemPrompt }];
         }
@@ -205,10 +205,10 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
         // We want to force end if assistant message count >= 12.
         const assistantMsgCount = history.filter((m: any) => m.role === 'assistant').length;
         if (assistantMsgCount >= 12) {
-             return res.json({ 
+            return res.json({
                 response: "We have reached the end of the interview. Please click the 'End Interview' button to submit your answers and get feedback.",
-                history: history 
-             });
+                history: history
+            });
         }
 
         // 3. Append User Input
@@ -220,6 +220,7 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
         const hfClient = getHF();
         const aiResponse = await hfClient.chatCompletion({
             model: 'openai/gpt-oss-120b',
+            provider: 'groq',
             messages: history,
             max_tokens: 500, // Keep it concise for voice
             temperature: 0.7,
@@ -237,9 +238,9 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
         );
 
         // 7. Return AI text for TTS
-        res.json({ 
+        res.json({
             response: aiText,
-            history: history 
+            history: history
         });
 
     } catch (err: any) {
@@ -251,11 +252,11 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
 // Submit/Finish Interview
 router.post('/submit', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
     const { attempt_id } = req.body;
-    
+
     try {
         const attemptResult = await query(`SELECT * FROM mock_interview_attempts WHERE id = $1`, [attempt_id]);
         if (attemptResult.rows.length === 0) return res.status(404).json({ error: 'Attempt not found' });
-        
+
         const history = attemptResult.rows[0].conversation_history;
 
         // Generate Final Feedback
@@ -265,23 +266,24 @@ router.post('/submit', authenticateJWT, authorizeRoles('student'), async (req: A
         ];
 
         const hfClient = getHF();
-        const aiResponse = await hfClient.chatCompletion({
+        const response = await hfClient.chatCompletion({
             model: 'openai/gpt-oss-120b',
+            provider: 'groq',
             messages: feedbackPrompt,
             max_tokens: 1000,
             temperature: 0.5,
-        });
+        } as any);
 
-        const content = aiResponse.choices[0].message.content || "";
-        
+        const content = response.choices[0].message.content || "";
+
         let feedbackData = { score: 0, feedback: "Could not parse feedback", strengths: [], weaknesses: [] };
         try {
             const jsonMatch = content.match(/\{[\s\S]*\}/); // Improved regex for multi-line JSON
             if (jsonMatch) {
                 feedbackData = JSON.parse(jsonMatch[0]);
             } else {
-                 // Fallback if no JSON found
-                 feedbackData.feedback = content;
+                // Fallback if no JSON found
+                feedbackData.feedback = content;
             }
         } catch (e) {
             console.error('JSON Parse Error', e);
@@ -298,6 +300,8 @@ router.post('/submit', authenticateJWT, authorizeRoles('student'), async (req: A
             [JSON.stringify(feedbackData), feedbackData.score || 0, attempt_id]
         );
 
+        res.json({ success: true, feedback: feedbackData });
+
     } catch (err) {
         console.error('Error submitting interview:', err);
         res.status(500).json({ error: 'Failed to submit interview' });
@@ -307,14 +311,14 @@ router.post('/submit', authenticateJWT, authorizeRoles('student'), async (req: A
 // Logs Integrity Violation
 router.post('/log-integrity', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
     const { attempt_id, event_type, details } = req.body;
-    
+
     try {
         // Verify attempt ownership
         const attemptResult = await query(`SELECT student_id FROM mock_interview_attempts WHERE id = $1`, [attempt_id]);
         if (attemptResult.rows.length === 0) return res.status(404).json({ error: 'Attempt not found' });
-        
+
         if (attemptResult.rows[0].student_id !== req.user?.id) {
-             return res.status(403).json({ error: 'Unauthorized' });
+            return res.status(403).json({ error: 'Unauthorized' });
         }
 
         await query(
