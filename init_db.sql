@@ -79,6 +79,7 @@ create table public.exams (
   start_time timestamp with time zone null,
   end_time timestamp with time zone null,
   shuffle_questions boolean default false,
+  year text null,
   created_at timestamp with time zone null default now(),
   constraint exams_pkey primary key (id),
   constraint exams_college_id_fkey foreign KEY (college_id) references colleges (id),
@@ -128,6 +129,7 @@ create table public.tint_materials (
   category text not null,
   title text not null,
   file_url text not null,
+  year text null,
   created_at timestamp with time zone null default now(),
   constraint tint_materials_pkey primary key (id),
   constraint tint_materials_college_id_fkey foreign KEY (college_id) references colleges (id)
@@ -262,6 +264,7 @@ CREATE TABLE public.circulars (
   content text NOT NULL,
   attachment_url text,
   created_by uuid REFERENCES public.users(id),
+  year text null,
   created_at timestamp with time zone DEFAULT now(),
   constraint circulars_pkey PRIMARY KEY (id)
 );
@@ -301,6 +304,7 @@ CREATE TABLE public.mock_interviews (
   start_time timestamp with time zone NOT NULL,
   end_time timestamp with time zone NOT NULL,
   created_by uuid REFERENCES public.users(id),
+  year text null,
   created_at timestamp with time zone DEFAULT now(),
   constraint mock_interviews_pkey PRIMARY KEY (id)
 );

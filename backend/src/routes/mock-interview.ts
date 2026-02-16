@@ -23,7 +23,7 @@ const getHF = () => {
 
 // Create a Mock Interview Slot
 router.post('/create', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest, res: any) => {
-    const { title, domain, topic, description, difficulty, start_time, end_time } = req.body;
+    const { title, domain, topic, description, difficulty, start_time, end_time, year } = req.body;
     const userId = req.user?.id;
 
     try {
@@ -35,10 +35,10 @@ router.post('/create', authenticateJWT, authorizeRoles('tpo'), async (req: AuthR
 
         const result = await query(
             `INSERT INTO mock_interviews 
-            (college_id, title, domain, topic, description, difficulty, start_time, end_time, created_by)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            (college_id, title, domain, topic, description, difficulty, start_time, end_time, created_by, year)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *`,
-            [collegeId, title, domain, topic, description || '', difficulty, start_time, end_time, userId]
+            [collegeId, title, domain, topic, description || '', difficulty, start_time, end_time, userId, year || null]
         );
 
         res.status(201).json(result.rows[0]);
@@ -76,13 +76,14 @@ router.get('/student/list', authenticateJWT, authorizeRoles('student'), async (r
         const userResult = await query('SELECT college_id FROM users WHERE id = $1', [userId]);
         const collegeId = userResult.rows[0]?.college_id;
 
-        // Fetch interviews + check if attempted
+        // Fetch interviews + check if attempted + filter by year
         const result = await query(
             `SELECT mi.*, 
             (SELECT COUNT(*) FROM mock_interview_attempts mia WHERE mia.mock_interview_id = mi.id AND mia.student_id = $2) as attempts_count,
             (SELECT status FROM mock_interview_attempts mia WHERE mia.mock_interview_id = mi.id AND mia.student_id = $2 LIMIT 1) as attempt_status
             FROM mock_interviews mi 
             WHERE mi.college_id = $1 
+            AND (mi.year IS NULL OR mi.year = '' OR mi.year = (SELECT year FROM users WHERE id = $2))
             ORDER BY mi.start_time ASC`,
             [collegeId, userId]
         );

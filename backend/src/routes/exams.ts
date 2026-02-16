@@ -23,6 +23,10 @@ router.get('/', authenticateJWT, collegeIsolation, async (req: AuthRequest, res:
             const collegeId = req.user?.college_id || null;
             sql += ' AND e.college_id = $2';
             params.push(collegeId);
+
+            if (req.user?.role === 'student') {
+                sql += ` AND (e.year IS NULL OR e.year = '' OR e.year = (SELECT year FROM users WHERE id = $1))`;
+            }
         }
 
         const result = await query(sql, params);
@@ -44,7 +48,7 @@ router.get('/:examId/questions', authenticateJWT, collegeIsolation, async (req: 
     const { examId } = req.params;
     try {
         // Verify exam belongs to user's college and check for shuffle setting
-        const examResult = await query('SELECT id, college_id, shuffle_questions FROM exams WHERE id = $1', [examId]);
+        const examResult = await query('SELECT id, college_id, shuffle_questions, year FROM exams WHERE id = $1', [examId]);
 
         if (examResult.rows.length === 0) {
             return res.status(404).json({ error: 'Exam not found' });
@@ -52,8 +56,17 @@ router.get('/:examId/questions', authenticateJWT, collegeIsolation, async (req: 
 
         const exam = examResult.rows[0];
 
-        if (req.user?.role !== 'admin' && exam.college_id !== req.user?.college_id) {
-            return res.status(403).json({ error: 'Unauthorized' });
+        if (req.user?.role !== 'admin') {
+            if (exam.college_id !== req.user?.college_id) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            }
+
+            if (req.user?.role === 'student' && exam.year) {
+                const userYearResult = await query('SELECT year FROM users WHERE id = $1', [req.user.id]);
+                if (userYearResult.rows[0]?.year !== exam.year) {
+                    return res.status(403).json({ error: 'This exam is not available for your year' });
+                }
+            }
         }
 
         const result = await query('SELECT id, question, options FROM questions WHERE exam_id = $1', [examId]);
@@ -74,11 +87,11 @@ router.get('/:examId/questions', authenticateJWT, collegeIsolation, async (req: 
 
 // Create an exam (TPO only)
 router.post('/', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest, res: any) => {
-    const { title, duration, code, start_time, end_time, shuffle_questions } = req.body;
+    const { title, duration, code, start_time, end_time, shuffle_questions, year } = req.body;
     try {
         const result = await query(
-            'INSERT INTO exams (title, code, duration, college_id, created_by, start_time, end_time, shuffle_questions) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [title, code, duration, req.user?.college_id, req.user?.id, start_time || null, end_time || null, shuffle_questions || false]
+            'INSERT INTO exams (title, code, duration, college_id, created_by, start_time, end_time, shuffle_questions, year) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [title, code, duration, req.user?.college_id, req.user?.id, start_time || null, end_time || null, shuffle_questions || false, year || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {

@@ -11,6 +11,7 @@ export default function NewExamPage() {
   const [duration, setDuration] = useState(30);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [year, setYear] = useState('');
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
   const [questions, setQuestions] = useState([
@@ -105,7 +106,8 @@ export default function NewExamPage() {
           code,
           start_time: startTime ? new Date(startTime).toISOString() : null,
           end_time: endTime ? new Date(endTime).toISOString() : null,
-          shuffle_questions: shuffleQuestions
+          shuffle_questions: shuffleQuestions,
+          year: year || null
         }),
       });
 
@@ -177,6 +179,20 @@ export default function NewExamPage() {
                   setDuration(isNaN(val) ? 0 : val);
                 }}
               />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Target Year</label>
+              <select
+                className="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 focus:ring-0 transition-all outline-none"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              >
+                <option value="">All Years</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
             </div>
           </div>
 

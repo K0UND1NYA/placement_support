@@ -11,6 +11,7 @@ export default function CircularsPage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [attachmentUrl, setAttachmentUrl] = useState("");
+    const [year, setYear] = useState("");
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deleteModal, setDeleteModal] = useState({ show: false, id: null });
@@ -66,11 +67,12 @@ export default function CircularsPage() {
 
             await apiFetch("/circulars", {
                 method: "POST",
-                body: JSON.stringify({ title, content, attachment_url: finalUrl }),
+                body: JSON.stringify({ title, content, attachment_url: finalUrl, year: year || null }),
             });
             setTitle("");
             setContent("");
             setAttachmentUrl("");
+            setYear("");
             setFile(null);
             fetchCirculars();
         } catch (err) {
@@ -139,6 +141,22 @@ export default function CircularsPage() {
                                     className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-600 transition-all outline-none resize-none text-black"
                                     required
                                 />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">
+                                    Target Year
+                                </label>
+                                <select
+                                    value={year}
+                                    onChange={(e) => setYear(e.target.value)}
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-600 transition-all outline-none text-black"
+                                >
+                                    <option value="">All Years</option>
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                </select>
                             </div>
                             <div>
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">
@@ -221,6 +239,11 @@ export default function CircularsPage() {
                                                     <User size={14} className="text-blue-500" />
                                                     <span className="text-[10px] font-black uppercase tracking-widest">
                                                         By {circular.creator_name || 'TPO Officer'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-slate-400">
+                                                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${circular.year ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                        {circular.year ? `${circular.year}${circular.year === '1' ? 'st' : circular.year === '2' ? 'nd' : circular.year === '3' ? 'rd' : 'th'} Year` : 'All Years'}
                                                     </span>
                                                 </div>
                                             </div>

@@ -109,7 +109,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <h4 className="font-bold text-slate-800">{quiz.title}</h4>
-                      <p className="text-xs text-slate-500 font-medium">Code: {quiz.code}</p>
+                      <p className="text-xs text-slate-500 font-medium">Code: {quiz.code} • {quiz.year ? `${quiz.year}${quiz.year === '1' ? 'st' : quiz.year === '2' ? 'nd' : quiz.year === '3' ? 'rd' : 'th'} Year` : 'All Years'}</p>
                     </div>
                   </div>
                   <div className="text-right">

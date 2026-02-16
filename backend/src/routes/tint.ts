@@ -15,6 +15,11 @@ router.get('/', authenticateJWT, collegeIsolation, async (req: AuthRequest, res:
         if (req.user?.role !== 'admin') {
             sql += ' AND college_id = $1';
             params.push(req.user?.college_id);
+
+            if (req.user?.role === 'student') {
+                sql += ` AND (year IS NULL OR year = '' OR year = (SELECT year FROM users WHERE id = $${params.length + 1}))`;
+                params.push(req.user.id);
+            }
         }
 
         const result = await query(sql, params);
@@ -26,11 +31,11 @@ router.get('/', authenticateJWT, collegeIsolation, async (req: AuthRequest, res:
 
 // Upload TINT material (TPO only)
 router.post('/', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest, res: any) => {
-    const { title, category, file_url } = req.body;
+    const { title, category, file_url, year } = req.body;
     try {
         const result = await query(
-            'INSERT INTO tint_materials (title, category, file_url, college_id) VALUES ($1, $2, $3, $4) RETURNING *',
-            [title, category, file_url, req.user?.college_id]
+            'INSERT INTO tint_materials (title, category, file_url, college_id, year) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [title, category, file_url, req.user?.college_id, year || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
