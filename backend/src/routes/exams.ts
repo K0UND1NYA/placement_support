@@ -133,10 +133,10 @@ router.post('/:examId/attempt', authenticateJWT, authorizeRoles('student'), asyn
             }
         });
 
-        // Update existing attempt
+        // Update existing attempt with answers JSON
         const attempt = await query(
-            'UPDATE attempts SET score = $1, submitted_at = NOW() WHERE id = $2 AND student_id = $3 AND submitted_at IS NULL RETURNING *',
-            [score, attempt_id, req.user?.id]
+            'UPDATE attempts SET score = $1, answers = $2, submitted_at = NOW() WHERE id = $3 AND student_id = $4 AND submitted_at IS NULL RETURNING *',
+            [score, JSON.stringify(answers), attempt_id, req.user?.id]
         );
 
         if (attempt.rows.length === 0) {
@@ -151,6 +151,43 @@ router.post('/:examId/attempt', authenticateJWT, authorizeRoles('student'), asyn
     } catch (err) {
         console.error('Submission Error:', err);
         res.status(500).json({ error: 'Failed to submit attempt' });
+    }
+});
+
+// Get Exam Review (Student only - after end_time)
+router.get('/:examId/review', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
+    const { examId } = req.params;
+
+    try {
+        // 1. Check if exam ended
+        const examCheck = await query('SELECT end_time FROM exams WHERE id = $1', [examId]);
+        if (examCheck.rows.length === 0) return res.status(404).json({ error: 'Exam not found' });
+
+        const exam = examCheck.rows[0];
+        if (!exam.end_time || new Date() < new Date(exam.end_time)) {
+            return res.status(403).json({ error: 'Review not available until exam ends' });
+        }
+
+        // 2. Get the student's attempt
+        const attempt = await query(
+            'SELECT answers, score, submitted_at FROM attempts WHERE exam_id = $1 AND student_id = $2 AND submitted_at IS NOT NULL ORDER BY submitted_at DESC LIMIT 1',
+            [examId, req.user?.id]
+        );
+
+        if (attempt.rows.length === 0) {
+            return res.status(404).json({ error: 'No submitted attempt found' });
+        }
+
+        // 3. Get questions with correct answers
+        const questions = await query('SELECT id, question, options, correct_answer FROM questions WHERE exam_id = $1', [examId]);
+
+        res.json({
+            attempt: attempt.rows[0],
+            questions: questions.rows
+        });
+    } catch (err) {
+        console.error('Review Fetch Error:', err);
+        res.status(500).json({ error: 'Failed to fetch review' });
     }
 });
 

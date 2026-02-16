@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6 h-full">
 
           {/* Recent Quizzes (Top) */}
-          <div className="bg-white rounded-2xl p-6 shadow flex flex-col flex-1 min-h-[400px]">
+          <div className="bg-white rounded-xl p-6 shadow flex flex-col flex-1 min-h-[400px]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-bold text-blue-700 text-lg flex items-center gap-2">
                 <FileQuestion size={20} />
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
               {recentQuizzes.map((quiz) => (
                 <div
                   key={quiz.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-blue-50/50 hover:bg-blue-50 transition border border-blue-100"
+                  className="flex items-center justify-between p-4 rounded-lg bg-blue-50/50 hover:bg-blue-50 transition border border-blue-100"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Pie Chart (Bottom) */}
-          <div className="bg-white rounded-2xl p-6 shadow flex flex-col justify-center h-full max-h-[300px]">
+          <div className="bg-white rounded-xl p-6 shadow flex flex-col justify-center h-full max-h-[300px]">
             <PieChart
               title="Student Performance (Avg)"
               data={[
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Monitoring Alerts */}
-          <ParticleCard glowColor="239, 68, 68" particleCount={15} className="bg-white rounded-2xl shadow">
+          <ParticleCard glowColor="239, 68, 68" particleCount={15} className="bg-white rounded-xl shadow">
             <div className="p-6 h-full flex flex-col max-h-[300px]">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="font-bold text-red-600 text-lg flex items-center gap-2">
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
 function StatCard({ title, value }) {
   return (
     <ParticleCard glowColor="59, 130, 246" particleCount={8}>
-      <div className="bg-white p-5 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-blue-100 hover:border-blue-500 hover:-translate-y-2 group relative hover:z-50">
+      <div className="bg-white p-5 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-blue-100 hover:border-blue-500 hover:-translate-y-2 group relative hover:z-50">
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover:text-blue-500 transition-colors">
           {title}
         </p>

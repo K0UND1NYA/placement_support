@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
-import { Plus, Mic, Calendar, Clock, BarChart, ExternalLink } from 'lucide-react';
+import { Plus, Mic, Calendar, Clock, Trash2 } from 'lucide-react';
+import Modal from '@/components/Modal';
 
 export default function MockInterviewsPage() {
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null, title: '' });
 
   useEffect(() => {
     fetchInterviews();
@@ -22,6 +24,26 @@ export default function MockInterviewsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteClick = (id, title) => {
+    setDeleteModal({ open: true, id, title });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await apiFetch(`/mock-interview/delete/${deleteModal.id}`, { method: 'DELETE' });
+      // Refresh the list
+      setInterviews(interviews.filter(i => i.id !== deleteModal.id));
+      setDeleteModal({ open: false, id: null, title: '' });
+    } catch (err) {
+      alert('Failed to delete interview: ' + err.message);
+      setDeleteModal({ open: false, id: null, title: '' });
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModal({ open: false, id: null, title: '' });
   };
 
   return (
@@ -102,9 +124,21 @@ export default function MockInterviewsPage() {
                       </div>
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-slate-400 hover:text-blue-600 font-bold transition-colors disabled:opacity-50 cursor-not-allowed" title="Interaction logs coming soon">
-                        View Logs
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link 
+                          href={`/dashboard/mock-interviews/${interview.id}/results`}
+                          className="text-slate-400 hover:text-blue-600 font-bold transition-colors"
+                        >
+                          View Logs
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteClick(interview.id, interview.title)}
+                          className="text-slate-400 hover:text-red-600 font-bold transition-colors p-1 hover:bg-red-50 rounded"
+                          title="Delete Interview"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                    </td>
                  </tr>
                ))}
@@ -132,6 +166,19 @@ export default function MockInterviewsPage() {
            </table>
         </div>
       )}
+
+
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        isOpen={deleteModal.open} 
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title="Delete Mock Interview"
+        message={`Are you sure you want to delete "${deleteModal.title}"?\n\n⚠️ This will permanently remove all student attempts and integrity logs. This action cannot be undone.`}
+        type="danger"
+        confirmText="Delete Interview"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
