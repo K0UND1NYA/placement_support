@@ -78,6 +78,7 @@ create table public.exams (
   created_by uuid null,
   start_time timestamp with time zone null,
   end_time timestamp with time zone null,
+  shuffle_questions boolean default false,
   created_at timestamp with time zone null default now(),
   constraint exams_pkey primary key (id),
   constraint exams_college_id_fkey foreign KEY (college_id) references colleges (id),
@@ -259,6 +260,7 @@ CREATE TABLE public.circulars (
   college_id uuid REFERENCES public.colleges(id),
   title text NOT NULL,
   content text NOT NULL,
+  attachment_url text,
   created_by uuid REFERENCES public.users(id),
   created_at timestamp with time zone DEFAULT now(),
   constraint circulars_pkey PRIMARY KEY (id)

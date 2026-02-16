@@ -1,6 +1,7 @@
 import express from 'express';
 import { query } from '../db';
 import { authenticateJWT, AuthRequest, authorizeRoles } from '../middleware/auth';
+import { deleteLocalFile } from '../utils/fileStorage';
 
 const router = express.Router();
 
@@ -31,8 +32,8 @@ router.get('/', authenticateJWT, async (req: AuthRequest, res: any) => {
 
 // POST a new circular (TPO only)
 router.post('/', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest, res: any) => {
-    const { title, content } = req.body;
-    
+    const { title, content, attachment_url } = req.body;
+
     if (!title || !content) {
         return res.status(400).json({ error: 'Title and content are required' });
     }
@@ -42,10 +43,10 @@ router.post('/', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest
         const userId = req.user?.id;
 
         const result = await query(`
-            INSERT INTO circulars (college_id, title, content, created_by)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO circulars (college_id, title, content, created_by, attachment_url)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
-        `, [collegeId, title, content, userId]);
+        `, [collegeId, title, content, userId, attachment_url || null]);
 
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -61,9 +62,9 @@ router.delete('/:id', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRe
     try {
         const collegeId = req.user?.college_id;
 
-        // Ensure the circular belongs to the TPO's college
+        // Ensure the circular belongs to the TPO's college and fetch its attachment_url
         const checkResult = await query(
-            'SELECT id FROM circulars WHERE id = $1 AND college_id = $2',
+            'SELECT id, attachment_url FROM circulars WHERE id = $1 AND college_id = $2',
             [id, collegeId]
         );
 
@@ -71,7 +72,14 @@ router.delete('/:id', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRe
             return res.status(404).json({ error: 'Circular not found or unauthorized' });
         }
 
+        const circular = checkResult.rows[0];
+
         await query('DELETE FROM circulars WHERE id = $1', [id]);
+
+        // Attempt to delete local file if it exists
+        if (circular.attachment_url) {
+            await deleteLocalFile(circular.attachment_url);
+        }
         res.json({ message: 'Circular deleted successfully' });
     } catch (err) {
         console.error('Delete Circular Error:', err);

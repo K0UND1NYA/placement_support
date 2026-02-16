@@ -10,6 +10,8 @@ export default function CircularsPage() {
     const [loading, setLoading] = useState(true);
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    const [attachmentUrl, setAttachmentUrl] = useState("");
+    const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deleteModal, setDeleteModal] = useState({ show: false, id: null });
 
@@ -35,15 +37,45 @@ export default function CircularsPage() {
 
         try {
             setIsSubmitting(true);
+
+            let finalUrl = attachmentUrl;
+
+            // If a file is selected, upload it first
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // We use fetch directly or fix apiFetch to handle FormData if needed
+                // Assuming apiFetch might not handle FormData by default, let's use fetch with session token
+                const token = sessionStorage.getItem('token');
+                const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/uploads-manager`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const uploadData = await uploadRes.json();
+                if (uploadData.success) {
+                    finalUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${uploadData.file_url}`;
+                } else {
+                    throw new Error(uploadData.error || 'File upload failed');
+                }
+            }
+
             await apiFetch("/circulars", {
                 method: "POST",
-                body: JSON.stringify({ title, content }),
+                body: JSON.stringify({ title, content, attachment_url: finalUrl }),
             });
             setTitle("");
             setContent("");
+            setAttachmentUrl("");
+            setFile(null);
             fetchCirculars();
         } catch (err) {
             console.error("Failed to create circular:", err);
+            alert(err.message || "Failed to create circular");
         } finally {
             setIsSubmitting(false);
         }
@@ -108,6 +140,32 @@ export default function CircularsPage() {
                                     required
                                 />
                             </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">
+                                    Attachment (PDF or Link)
+                                </label>
+                                <div className="space-y-3">
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={(e) => setFile(e.target.files[0])}
+                                        className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 text-xs font-medium focus:ring-2 focus:ring-blue-600 transition-all outline-none text-black"
+                                    />
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-px flex-1 bg-slate-100"></div>
+                                        <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Or provide URL</span>
+                                        <div className="h-px flex-1 bg-slate-100"></div>
+                                    </div>
+                                    <input
+                                        type="url"
+                                        value={attachmentUrl}
+                                        onChange={(e) => setAttachmentUrl(e.target.value)}
+                                        placeholder="https://drive.google.com/..."
+                                        className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-600 transition-all outline-none text-black"
+                                        disabled={!!file}
+                                    />
+                                </div>
+                            </div>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
@@ -125,7 +183,7 @@ export default function CircularsPage() {
                     <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 ml-2">
                         Recent Broadcasts
                     </h3>
-                    
+
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
                             <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -175,11 +233,24 @@ export default function CircularsPage() {
                                             <Trash2 size={18} />
                                         </button>
                                     </div>
-                                    <div className="prose prose-slate max-w-none mb-4">
+                                    <div className="prose prose-slate max-w-none mb-6">
                                         <p className="text-slate-600 text-sm font-medium leading-relaxed whitespace-pre-wrap">
                                             {circular.content}
                                         </p>
                                     </div>
+                                    {circular.attachment_url && (
+                                        <div className="mb-6">
+                                            <a
+                                                href={circular.attachment_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-all"
+                                            >
+                                                <Send size={14} className="rotate-45" />
+                                                View Attachment
+                                            </a>
+                                        </div>
+                                    )}
                                     <div className="h-1.5 w-12 bg-blue-600 rounded-full"></div>
                                 </div>
                             </div>
