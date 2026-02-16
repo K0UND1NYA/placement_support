@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { Trash2, ExternalLink, FileText, Plus, X } from 'lucide-react';
+import Modal from '@/components/Modal';
 
 export default function TPOTintPage() {
   const [materials, setMaterials] = useState([]);
@@ -11,6 +12,8 @@ export default function TPOTintPage() {
   const [formData, setFormData] = useState({ title: '', category: 'aptitude', file_url: '' });
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
 
   useEffect(() => {
     apiFetch('/tint').then(setMaterials).finally(() => setLoading(false));
@@ -53,20 +56,25 @@ export default function TPOTintPage() {
       setFile(null);
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Upload failed');
+      setErrorModal({ isOpen: true, message: err.message || 'Upload failed' });
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this material?')) return;
+  const handleDelete = (id) => {
+    setDeleteModal({ isOpen: true, id });
+  };
+
+  const confirmDelete = async () => {
     try {
-      await apiFetch(`/tint/${id}`, { method: 'DELETE' });
-      setMaterials(materials.filter(m => m.id !== id));
+      await apiFetch(`/tint/${deleteModal.id}`, { method: 'DELETE' });
+      setMaterials(materials.filter(m => m.id !== deleteModal.id));
+      setDeleteModal({ isOpen: false, id: null });
     } catch (err) {
       console.error(err);
-      alert('Delete failed');
+      setDeleteModal({ isOpen: false, id: null });
+      setErrorModal({ isOpen: true, message: 'Delete failed' });
     }
   };
 
@@ -189,6 +197,30 @@ export default function TPOTintPage() {
           ))}
         </div>
       )}
+
+      {/* Error Modal */}
+      <Modal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        onConfirm={() => setErrorModal({ isOpen: false, message: '' })}
+        title="Error"
+        message={errorModal.message}
+        type="danger"
+        confirmText="OK"
+        showCancel={false}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={confirmDelete}
+        title="Delete Material"
+        message="Are you sure you want to delete this material? This action cannot be undone."
+        type="danger"
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
