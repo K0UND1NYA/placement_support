@@ -37,7 +37,7 @@ export default function TPOTintPage() {
 
         const uploadData = await uploadRes.json();
         if (uploadData.success) {
-          finalUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${uploadData.file_url}`;
+          finalUrl = uploadData.file_url;
         } else {
           throw new Error(uploadData.error || 'File upload failed');
         }
@@ -80,8 +80,8 @@ export default function TPOTintPage() {
         <button
           onClick={() => setShowUpload(!showUpload)}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all active:scale-95 ${showUpload
-              ? 'bg-slate-100 text-slate-600'
-              : 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+            ? 'bg-slate-100 text-slate-600'
+            : 'bg-blue-600 text-white shadow-lg shadow-blue-200'
             }`}
         >
           {showUpload ? <X size={18} /> : <Plus size={18} />}
