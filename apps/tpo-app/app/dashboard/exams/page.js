@@ -56,6 +56,7 @@ export default function ExamsPage() {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Title</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Duration</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Year</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Schedule</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Created At</th>
@@ -68,6 +69,7 @@ export default function ExamsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{exam.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-mono tracking-wider">{exam.code || 'N/A'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{exam.duration} mins</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-bold">{exam.year ? `${exam.year}${exam.year === '1' ? 'st' : exam.year === '2' ? 'nd' : exam.year === '3' ? 'rd' : 'th'} Year` : 'All'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-bold">{exam.question_count || 0} Qs</td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
                     {exam.start_time ? (

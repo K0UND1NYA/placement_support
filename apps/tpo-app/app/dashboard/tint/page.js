@@ -9,7 +9,7 @@ export default function TPOTintPage() {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
-  const [formData, setFormData] = useState({ title: '', category: 'aptitude', file_url: '' });
+  const [formData, setFormData] = useState({ title: '', category: 'aptitude', file_url: '', year: '' });
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' });
@@ -52,7 +52,7 @@ export default function TPOTintPage() {
       });
       setMaterials([newMaterial, ...materials]);
       setShowUpload(false);
-      setFormData({ title: '', category: 'aptitude', file_url: '' });
+      setFormData({ title: '', category: 'aptitude', file_url: '', year: '' });
       setFile(null);
     } catch (err) {
       console.error(err);
@@ -122,6 +122,19 @@ export default function TPOTintPage() {
             </select>
           </div>
           <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Target Year</label>
+            <select
+              className="w-full bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all text-black appearance-none cursor-pointer"
+              value={formData.year} onChange={e => setFormData({ ...formData, year: e.target.value })}
+            >
+              <option value="">All Years</option>
+              <option value="1">1st Year</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+              <option value="4">4th Year</option>
+            </select>
+          </div>
+          <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Attachment (PDF)</label>
             <input
               type="file"
@@ -153,50 +166,58 @@ export default function TPOTintPage() {
             {isUploading ? 'Uploading...' : 'Save Material'}
           </button>
         </form>
-      )}
+      )
+      }
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {['aptitude', 'logical', 'verbal', 'interview'].map(cat => (
-            <div key={cat} className="space-y-4">
-              <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2 border-b border-slate-100 pb-2 ml-1">{cat}</h3>
-              {materials.filter(m => m.category === cat).map(m => (
-                <div key={m.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 group hover:border-blue-200 transition-all">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <FileText size={16} className="text-blue-500" />
-                      <span className="font-bold text-slate-800 text-sm line-clamp-1">{m.title}</span>
+      {
+        loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {['aptitude', 'logical', 'verbal', 'interview'].map(cat => (
+              <div key={cat} className="space-y-4">
+                <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2 border-b border-slate-100 pb-2 ml-1">{cat}</h3>
+                {materials.filter(m => m.category === cat).map(m => (
+                  <div key={m.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 group hover:border-blue-200 transition-all">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <FileText size={16} className="text-blue-500" />
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-800 text-sm line-clamp-1">{m.title}</span>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                            {m.year ? `${m.year}${m.year === '1' ? 'st' : m.year === '2' ? 'nd' : m.year === '3' ? 'rd' : 'th'} Year` : 'All Years'}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDelete(m.id)}
+                        className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleDelete(m.id)}
-                      className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    <a
+                      href={m.file_url}
+                      target="_blank"
+                      className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 py-2.5 px-3 rounded-xl hover:bg-blue-600 hover:text-white transition-all text-center justify-center"
                     >
-                      <Trash2 size={14} />
-                    </button>
+                      <ExternalLink size={12} />
+                      View Material
+                    </a>
                   </div>
-                  <a
-                    href={m.file_url}
-                    target="_blank"
-                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 py-2.5 px-3 rounded-xl hover:bg-blue-600 hover:text-white transition-all text-center justify-center"
-                  >
-                    <ExternalLink size={12} />
-                    View Material
-                  </a>
-                </div>
-              ))}
-              {materials.filter(m => m.category === cat).length === 0 && (
-                <div className="bg-slate-50/50 rounded-2xl p-6 border border-dashed border-slate-200 text-center">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No materials</p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                ))}
+                {materials.filter(m => m.category === cat).length === 0 && (
+                  <div className="bg-slate-50/50 rounded-2xl p-6 border border-dashed border-slate-200 text-center">
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No materials</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )
+      }
 
       {/* Error Modal */}
       <Modal
@@ -221,6 +242,6 @@ export default function TPOTintPage() {
         confirmText="Delete"
         cancelText="Cancel"
       />
-    </div>
+    </div >
   );
 }

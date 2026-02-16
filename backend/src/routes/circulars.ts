@@ -20,8 +20,9 @@ router.get('/', authenticateJWT, async (req: AuthRequest, res: any) => {
             FROM circulars c
             LEFT JOIN users u ON c.created_by = u.id
             WHERE c.college_id = $1
+            ${req.user?.role === 'student' ? "AND (c.year IS NULL OR c.year = '' OR c.year = (SELECT year FROM users WHERE id = $2))" : ""}
             ORDER BY c.created_at DESC
-        `, [collegeId]);
+        `, req.user?.role === 'student' ? [collegeId, req.user.id] : [collegeId]);
 
         res.json(result.rows);
     } catch (err) {
@@ -41,12 +42,13 @@ router.post('/', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest
     try {
         const collegeId = req.user?.college_id;
         const userId = req.user?.id;
+        const { year } = req.body;
 
         const result = await query(`
-            INSERT INTO circulars (college_id, title, content, created_by, attachment_url)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO circulars (college_id, title, content, created_by, attachment_url, year)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
-        `, [collegeId, title, content, userId, attachment_url || null]);
+        `, [collegeId, title, content, userId, attachment_url || null, year || null]);
 
         res.status(201).json(result.rows[0]);
     } catch (err) {
