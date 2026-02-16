@@ -58,7 +58,7 @@ export default function CircularsPage() {
 
                 const uploadData = await uploadRes.json();
                 if (uploadData.success) {
-                    finalUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${uploadData.file_url}`;
+                    finalUrl = uploadData.file_url;
                 } else {
                     throw new Error(uploadData.error || 'File upload failed');
                 }

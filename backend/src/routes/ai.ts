@@ -47,12 +47,13 @@ Questions:`;
 
         const response = await hfClient.chatCompletion({
             model: 'openai/gpt-oss-120b',
+            provider: 'groq',
             messages: [
                 { role: "user", content: prompt }
             ],
             max_tokens: 3000,
-            temperature: 0.8,
-        });
+            temperature: 0.7,
+        } as any);
 
 
         if (!response.choices || !response.choices[0] || !response.choices[0].message.content) {

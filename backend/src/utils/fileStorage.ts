@@ -1,31 +1,32 @@
-import fs from 'fs';
-import path from 'path';
+import { supabase } from '../supabase';
 
 /**
- * Deletes a local file if the provided URL points to one.
- * @param fileUrl The URL of the file (can be absolute or relative)
+ * Deletes a file from Supabase Storage if the provided URL points to one.
+ * @param fileUrl The Public URL of the file
  */
 export async function deleteLocalFile(fileUrl: string | null | undefined): Promise<void> {
     if (!fileUrl) return;
 
     try {
-        // We look for the pattern "/uploads/" in the URL
-        if (fileUrl.includes('/uploads/')) {
-            // Extract the filename. The URL usually ends with /uploads/filename.ext
-            const parts = fileUrl.split('/uploads/');
+        // Look for our specific bucket name in the URL to identify Supabase files
+        if (fileUrl.includes('/storage/v1/object/public/materials/')) {
+            // Extract the relative path after the bucket name
+            const parts = fileUrl.split('/materials/');
             if (parts.length > 1) {
-                const filename = parts[parts.length - 1];
-                const filePath = path.join(__dirname, '../../uploads', filename);
+                const filePath = parts[parts.length - 1];
 
-                // Check if file exists before trying to delete
-                if (fs.existsSync(filePath)) {
-                    await fs.promises.unlink(filePath);
-                    console.log(`Deleted local file: ${filePath}`);
+                const { error } = await supabase.storage
+                    .from('materials')
+                    .remove([filePath]);
+
+                if (error) {
+                    console.error('Supabase Delete Error:', error);
+                } else {
+                    console.log(`Deleted Supabase file: ${filePath}`);
                 }
             }
         }
     } catch (err) {
-        console.error(`Error deleting local file ${fileUrl}:`, err);
-        // We don't throw here to avoid failing the whole request if file deletion fails
+        console.error(`Error deleting Supabase file ${fileUrl}:`, err);
     }
 }
