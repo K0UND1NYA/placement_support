@@ -108,6 +108,22 @@ router.post('/start', authenticateJWT, authorizeRoles('student'), async (req: Au
             return res.json(existing.rows[0]); // Return existing attempt
         }
 
+        // Validate Time Window
+        const interviewResult = await query(`SELECT start_time, end_time FROM mock_interviews WHERE id = $1`, [mock_interview_id]);
+        if (interviewResult.rows.length === 0) return res.status(404).json({ error: 'Interview not found' });
+        
+        const { start_time, end_time } = interviewResult.rows[0];
+        const now = new Date();
+        const start = new Date(start_time);
+        const end = new Date(end_time);
+
+        if (now < start) {
+            return res.status(400).json({ error: 'Interview has not started yet' });
+        }
+        if (now > end) {
+            return res.status(400).json({ error: 'Interview time has expired' });
+        }
+
         // Initialize with system prompt
         const initialHistory = [{
             role: 'system',
@@ -176,6 +192,7 @@ router.post('/process-interaction', authenticateJWT, authorizeRoles('student'), 
             - Ask ONE question at a time.
             - Provide brief feedback on the user's answer if it's incorrect or vague, then move to the next question.
             - Keep responses conversational (for voice output).
+            - Use plain text only. Do NOT use markdown (no **bold** or *italics*).
             - Do NOT write code blocks unless asked.
             - Start by introducing yourself and asking the first question.`;
             
@@ -281,10 +298,103 @@ router.post('/submit', authenticateJWT, authorizeRoles('student'), async (req: A
             [JSON.stringify(feedbackData), feedbackData.score || 0, attempt_id]
         );
 
-        res.json({ success: true, feedback: feedbackData });
     } catch (err) {
         console.error('Error submitting interview:', err);
         res.status(500).json({ error: 'Failed to submit interview' });
+    }
+});
+
+// Logs Integrity Violation
+router.post('/log-integrity', authenticateJWT, authorizeRoles('student'), async (req: AuthRequest, res: any) => {
+    const { attempt_id, event_type, details } = req.body;
+    
+    try {
+        // Verify attempt ownership
+        const attemptResult = await query(`SELECT student_id FROM mock_interview_attempts WHERE id = $1`, [attempt_id]);
+        if (attemptResult.rows.length === 0) return res.status(404).json({ error: 'Attempt not found' });
+        
+        if (attemptResult.rows[0].student_id !== req.user?.id) {
+             return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        await query(
+            `INSERT INTO mock_interview_integrity_logs (mock_interview_attempt_id, event_type, details)
+             VALUES ($1, $2, $3)`,
+            [attempt_id, event_type, JSON.stringify(details || {})]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error logging integrity violation:', err);
+        res.status(500).json({ error: 'Failed to log violation' });
+    }
+});
+
+// TPO: Get Attempts for an Interview (with integrity summary)
+router.get('/tpo/attempts/:mock_interview_id', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest, res: any) => {
+    const { mock_interview_id } = req.params;
+    const userId = req.user?.id;
+
+    try {
+        // Verify TPO access to this interview
+        const interviewResult = await query(
+            `SELECT mi.id FROM mock_interviews mi
+             JOIN users u ON u.college_id = mi.college_id
+             WHERE mi.id = $1 AND u.id = $2`,
+            [mock_interview_id, userId]
+        );
+
+        if (interviewResult.rows.length === 0) {
+            return res.status(403).json({ error: 'Unauthorized or Interview not found' });
+        }
+
+        const result = await query(
+            `SELECT 
+                mia.*,
+                u.name as student_name,
+                u.email as student_email,
+                u.usn as student_usn,
+                (SELECT COUNT(*) FROM mock_interview_integrity_logs mil WHERE mil.mock_interview_attempt_id = mia.id) as violation_count,
+                (SELECT json_agg(mil.*) FROM mock_interview_integrity_logs mil WHERE mil.mock_interview_attempt_id = mia.id) as logs
+             FROM mock_interview_attempts mia
+             JOIN users u ON mia.student_id = u.id
+             WHERE mia.mock_interview_id = $1
+             ORDER BY mia.created_at DESC`,
+            [mock_interview_id]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching attempts:', err);
+        res.status(500).json({ error: 'Failed to fetch attempts' });
+    }
+});
+
+// Delete Mock Interview (TPO only)
+router.delete('/delete/:mock_interview_id', authenticateJWT, authorizeRoles('tpo'), async (req: AuthRequest, res: any) => {
+    const { mock_interview_id } = req.params;
+    const userId = req.user?.id;
+
+    try {
+        // Verify TPO owns this interview
+        const interviewResult = await query(
+            `SELECT mi.id FROM mock_interviews mi
+             JOIN users u ON u.college_id = mi.college_id
+             WHERE mi.id = $1 AND u.id = $2`,
+            [mock_interview_id, userId]
+        );
+
+        if (interviewResult.rows.length === 0) {
+            return res.status(403).json({ error: 'Unauthorized or Interview not found' });
+        }
+
+        // Delete the interview (CASCADE will handle attempts and logs)
+        await query(`DELETE FROM mock_interviews WHERE id = $1`, [mock_interview_id]);
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting interview:', err);
+        res.status(500).json({ error: 'Failed to delete interview' });
     }
 });
 

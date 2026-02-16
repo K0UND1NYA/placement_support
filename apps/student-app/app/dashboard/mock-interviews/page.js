@@ -100,15 +100,47 @@ export default function StudentMockInterviewsPage() {
             Feedback Available Soon
           </div>
         ) : (
-          <Link
-            href={`/dashboard/mock-interviews/${interview.id}`}
-            className={`flex items-center justify-center gap-2 w-full
-            py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-lg
-            ${isActive || inProgress ? 'bg-slate-900 text-white hover:bg-blue-600' : 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none'}`}
-          >
-            {inProgress ? 'Resume' : 'Start'}
-            <ChevronRight size={14} />
-          </Link>
+          (() => {
+             const now = new Date();
+             const start = new Date(interview.start_time);
+             const end = new Date(interview.end_time);
+             const isUpcoming = now < start;
+             const isExpired = now > end;
+             const isActiveWindow = now >= start && now <= end;
+             
+             // Allow resume if in progress, even if expired (optional policy, but usually good ux)
+             // But strict requirement says "expired the student can still attend... fix that".
+             // So if expired, disable everything unless maybe they are already inside? 
+             // Let's stick to strict: if expired, cannot enter.
+             
+             if (isExpired) {
+                 return (
+                    <div className="text-center text-[10px] font-bold uppercase tracking-widest text-red-400 py-1 border-t border-slate-50 pt-3">
+                        Expired
+                    </div>
+                 );
+             }
+             
+             if (isUpcoming) {
+                 return (
+                    <div className="text-center text-[10px] font-bold uppercase tracking-widest text-amber-500 py-1 border-t border-slate-50 pt-3">
+                        Starts {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                 );
+             }
+
+             return (
+              <Link
+                href={`/dashboard/mock-interviews/${interview.id}`}
+                className={`flex items-center justify-center gap-2 w-full
+                py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-lg
+                ${isActiveWindow || inProgress ? 'bg-slate-900 text-white hover:bg-blue-600' : 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none'}`}
+              >
+                {inProgress ? 'Resume' : 'Start'}
+                <ChevronRight size={14} />
+              </Link>
+             );
+          })()
         )}
       </div>
     );
