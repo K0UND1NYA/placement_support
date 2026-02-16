@@ -347,8 +347,6 @@ router.get('/tpo/attempts/:mock_interview_id', authenticateJWT, authorizeRoles('
              WHERE mi.id = $1 AND u.id = $2`,
             [mock_interview_id, userId]
         );
-
-        
         if (interviewResult.rows.length === 0) {
             return res.status(403).json({ error: 'Unauthorized or Interview not found' });
         }
